@@ -1,0 +1,167 @@
+/* =====================================================================
+   ZV CONSULTING — responsive.css
+   Radical restructuring for tablet and mobile.
+   ===================================================================== */
+
+/* ---- Tablet: soften multi-column layouts ---- */
+@media (max-width: 1024px) {
+  .steps { grid-template-columns: repeat(2, 1fr); }
+  .service { gap: clamp(1.5rem, 4vw, 3rem); }
+}
+
+/* ===================================================================
+   MOBILE (<= 760px): the layout reorganises, not just shrinks.
+   =================================================================== */
+@media (max-width: 760px) {
+
+  /* ---- Nav: links become a fullscreen menu ---- */
+  .nav__links { display: none; }
+  .nav__burger { display: flex; }
+  .nav__pill { padding: 0.55rem 0.55rem 0.55rem 1rem; }
+  .nav__brand-text { display: none; }
+
+  /* ---- Act (hero + pain sequence) ---- */
+  /* Stack "Más" over the ticker; make it fill the phone width (big, little air). */
+  .act__hero { top: 18%; }
+  .hero__title { font-size: clamp(3.6rem, 17vw, 6rem); }
+  /* stack "Más" over the word and skip the whole-block width scaling */
+  .hero__fit { width: auto !important; }
+  .hero__scale {
+    transform: none !important;
+    flex-direction: column;
+    align-items: center;
+  }
+  /* "Más" stays constant; the WORD scales (from its top centre) to fill the
+     width — shorter words end up taller, same width. Extra bottom room so the
+     tallest scaled word doesn't crowd the subtitle. */
+  /* keep the window at the CURRENT word's width (--mask-w) so scaling by
+     targetW/wordW lands every word on the same target width; width:auto would
+     make the window the widest word and the scale would overshoot/overflow.
+     transform-origin sits at the glyph's ascender line (~27% down the box), so
+     scaling pins the word's VISUAL TOP in place — the gap under "Más" stays
+     constant no matter how much a shorter word is scaled up. */
+  .ticker {
+    text-align: center;
+    transform: scale(var(--word-scale, 1));
+    transform-origin: center 27%;
+    transition: width 0.6s var(--ease-io), transform 0.6s var(--ease-io);
+    margin-bottom: 0.5em;
+  }
+  .hero__subtitle { font-size: var(--step-1); }
+
+  .act__paintext span { font-size: clamp(2rem, 9vw, 3.2rem); }
+  /* The 3D monogram is smaller on a phone, so at the same --mono-rise it only
+     climbs ~a third of the screen. Push its travel further so it reaches the
+     middle of the viewport like it does on desktop. */
+  .act__mono {
+    width: 150vw;
+    transform: translate(-50%, calc(44% - var(--mono-rise, 0) * 82%))
+               scale(calc(1 - 0.4 * var(--mono-rise, 0)));
+  }
+  /* pills keep flowing, but centred full-width (no left/right scatter) */
+  .act__pains .pain,
+  .act__pains .pain:nth-child(1),
+  .act__pains .pain:nth-child(2),
+  .act__pains .pain:nth-child(3),
+  .act__pains .pain:nth-child(4),
+  .act__pains .pain:nth-child(5) {
+    left: 50%; right: auto;
+    width: 88vw;
+    transform: translate(-50%, calc(var(--py, 60) * 1vh));
+    padding: 0.95rem 1.3rem; gap: 0.75rem; font-size: var(--step-0);
+  }
+  .pain__ico { padding-right: 0.75rem; }
+
+  /* solution: loose title + subtitle/button, narrower on phones */
+  .solution__title, .solution__body { width: 90vw; }
+  /* match the pain title's mobile size; wrap to two lines if it needs to */
+  .solution__title { font-size: clamp(2rem, 9vw, 3.2rem); }
+  .solution__sub { font-size: var(--step-0); }
+
+  /* ---- Services (mobile — ported from the prototype) ----
+     The pinned "Nuestros servicios" title stays (act.js handoff). The fixed
+     edge overlay is dropped; each video goes INLINE, full-bleed, above its text
+     block, and each block is a ~75vh centred panel. Sizes/margins are the
+     prototype's exact values. */
+  .services__videos { display: none; }               /* fixed edge overlay is desktop-only */
+
+  .services__titlebar { top: 84px; }                 /* dock clearly below the nav pill */
+  .services__title { font-size: var(--step-3); }
+  .services__mask { top: -12vh; height: 30vh; }      /* dissolve band under the pinned title */
+
+  .services__text { padding-top: 8vh; padding-inline: 20px; max-width: none; }
+  .svc, .svc--right, .svc--left {
+    min-height: 75vh; max-width: 100%;
+    margin: 0 0 40px; padding: 0;
+    text-align: center;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+  }
+  /* full-bleed inline video (calc(100% + 40px) bleeds 20px past the 20px padding
+     on each side = edge to edge), no mask/crop — exactly like the prototype */
+  .svc-vid.is-inline {
+    position: relative; display: block;
+    width: calc(100% + 40px); max-width: none; height: auto;
+    margin-left: -20px;
+    left: auto; right: auto; top: auto; bottom: auto;
+    border-radius: 0; -webkit-mask: none; mask: none; z-index: 1;
+  }
+  /* per-video top/bottom margins (prototype values) */
+  [data-svc-vid="0"].is-inline { margin-top: 10px; margin-bottom: 20px; }
+  [data-svc-vid="1"].is-inline { margin-top: 30px; margin-bottom: 15px; }
+  [data-svc-vid="2"].is-inline { margin-top: 0;    margin-bottom: 40px; }
+  [data-svc-vid="3"].is-inline { margin-top: 20px; margin-bottom: 20px; }
+  .svc__index { font-size: var(--step-1); position: relative; z-index: 20; }
+  .svc__title { font-size: 3rem; position: relative; z-index: 20; }
+  .svc__desc { font-size: 1.15rem; position: relative; z-index: 20; }
+
+  /* ---- Voices: the horizontal marquee shows almost nothing on a phone, so it
+          turns VERTICAL — a centred column of cards drifting upward inside a
+          fixed window, fading into the dark at the top and bottom edges. ---- */
+  .voices__track-wrap {
+    height: 66vh; overflow: hidden;
+    -webkit-mask: linear-gradient(180deg, transparent 0, #000 14%, #000 86%, transparent 100%);
+    mask: linear-gradient(180deg, transparent 0, #000 14%, #000 86%, transparent 100%);
+  }
+  .voices__track {
+    flex-direction: column; width: auto; height: max-content;
+    align-items: center; gap: 1.2rem;
+  }
+  .vcard { width: min(86vw, 420px); padding: 1.6rem; }
+
+  /* ---- Process: 4-col grid becomes a vertical numbered timeline ---- */
+  .steps {
+    grid-template-columns: 1fr;
+    gap: 0; max-width: 520px;
+  }
+  .step {
+    border-top: none;
+    padding: 1.5rem 0 1.5rem 4.5rem;
+    margin-left: 1.4rem;                 /* ALL steps share the same left inset */
+  }
+  /* the connecting rail only runs between nodes, so the LAST step drops it —
+     but it keeps the same margin + number offset so it stays aligned (centred) */
+  .step:not(:last-child) { border-left: 1px solid var(--line-strong); }
+  .step__num {
+    position: absolute; left: 1.4rem; top: 1.2rem;
+    margin: 0; font-size: 2.4rem;
+    transform: translateX(-50%);
+    background: var(--noir-2); padding: 0 0.2rem;
+  }
+
+  /* ---- Contact: columns stack ---- */
+  .contact__cols { grid-template-columns: 1fr; }
+  .contact__col[data-reveal] { --rd: 0s; }   /* no stagger when stacked */
+  /* keep "¿Te ayudamos?" on one line even on the narrowest phones */
+  .contact__heading { font-size: clamp(2rem, 8.2vw, 3.2rem); }
+
+  /* ---- Footer stacks ---- */
+  .footer { flex-direction: column; text-align: center; gap: 1.2rem; }
+
+  /* WhatsApp bubble hidden on very small screens to avoid crowding */
+  .wa__btn { width: 54px; height: 54px; }
+}
+
+/* Small phones: keep the WA bubble from covering the screen */
+@media (max-width: 420px) {
+  .wa.is-open .wa__bubble { max-width: 190px; white-space: normal; line-height: 1.25; }
+}

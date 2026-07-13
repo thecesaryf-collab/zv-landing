@@ -1,0 +1,359 @@
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ZV Consulting — Sistemas que convierten oportunidades en ingresos</title>
+<meta name="description" content="ZV Consulting: creamos los sistemas, herramientas y estrategias que convierten tus oportunidades en ingresos reales. Captación, imagen, presencia digital y automatización con IA." />
+<meta name="theme-color" content="#0A0806" />
+
+<!-- Fonts: preconnect keeps this fast; font-display swap degrades gracefully if the CDN is slow -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..500&family=Hanken+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+<link rel="stylesheet" href="styles/base.css" />
+<link rel="stylesheet" href="styles/sections.css" />
+<link rel="stylesheet" href="styles/responsive.css" />
+
+<link rel="icon" href="ZV_logo.png" />
+
+<!-- ============================ NAV ============================ -->
+<header class="nav" id="nav" data-nav>
+  <div class="nav__pill">
+    <a class="nav__brand" href="#inicio" aria-label="ZV Consulting — inicio">
+      <img src="ZV_logo.png" alt="" class="nav__logo" width="40" height="40" />
+      <span class="nav__brand-text">Consulting</span>
+    </a>
+    <nav class="nav__links" aria-label="Principal">
+      <a href="#inicio" class="nav__link">Inicio</a>
+      <a href="#competencias" class="nav__link">Competencias</a>
+      <a href="#opiniones" class="nav__link">Opiniones</a>
+      <a href="#proceso" class="nav__link">Proceso</a>
+      <a href="#contacto" class="nav__link nav__link--cta">Contacto</a>
+    </nav>
+    <button class="nav__burger" id="nav-burger" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobile-menu">
+      <span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<!-- Fullscreen mobile menu -->
+<div class="mobile-menu" id="mobile-menu" aria-hidden="true">
+  <nav class="mobile-menu__nav" aria-label="Menú móvil">
+    <a href="#inicio" class="mobile-menu__link"><span>Inicio</span></a>
+    <a href="#competencias" class="mobile-menu__link"><span>Competencias</span></a>
+    <a href="#opiniones" class="mobile-menu__link"><span>Opiniones</span></a>
+    <a href="#proceso" class="mobile-menu__link"><span>Proceso</span></a>
+    <a href="#contacto" class="mobile-menu__link"><span>Contacto</span></a>
+  </nav>
+  <div class="mobile-menu__foot">
+    <a href="tel:+34608631224">+34 608 631 224</a>
+    <a href="mailto:info@zvconsulting.com">info@zvconsulting.com</a>
+  </div>
+</div>
+
+<main>
+  <!-- =================================================================
+       ACT — one pinned scroll sequence, ONE 3D ZV monogram:
+       (1) hero copy high up + dormant ZV peeking from below
+       (2) pain title rises BEHIND the ZV (visible through its gaps),
+           revealing left→right, while the ZV ignites and the light warms
+       (3) ~70%: the ZV rises and shrinks
+       (4) glass pain-point pills float in, scattered
+       ================================================================= -->
+  <section class="act" id="inicio" data-act>
+    <div class="act__sticky" data-act-sticky>
+      <div class="act__bg" data-act-bg aria-hidden="true"></div>
+      <div class="act__corners" aria-hidden="true"></div>
+      <!-- faint warm lights (incl. behind the title) that drift + intensify on scroll -->
+      <div class="act__aura" aria-hidden="true"></div>
+
+      <!-- lower layer: the pain title, seen through the ZV's negative space -->
+      <div class="act__paintext" data-paintext aria-hidden="true">
+        <span>Tu negocio pierde dinero cada día por…</span>
+      </div>
+
+      <!-- the single 3D ZV monogram -->
+      <div class="act__mono" data-mono aria-hidden="true">
+        <div class="mono">
+          <span class="mono__shadow"></span>
+          <span class="mono__extrude"></span>
+          <span class="mono__rim mono__rim--cool"></span>
+          <span class="mono__rim mono__rim--warm"></span>
+          <span class="mono__face"></span>
+          <span class="mono__glow"></span>
+          <span class="mono__sheen"></span>
+        </div>
+      </div>
+
+      <!-- top layer: hero copy (fades out as the sequence begins) -->
+      <div class="act__hero" data-hero-copy>
+        <h1 class="hero__title">
+          <span class="hero__fit" data-ticker-fit aria-hidden="true">
+            <span class="hero__scale" data-ticker-scale>
+              <span class="hero__mas">Más&nbsp;</span>
+              <span class="ticker" data-ticker>
+                <ul class="ticker__list" data-ticker-list>
+                  <li>alcance.</li>
+                  <li>clientes.</li>
+                  <li>crecimiento.</li>
+                  <li aria-hidden="true">alcance.</li>
+                </ul>
+              </span>
+            </span>
+          </span>
+          <span class="sr-only">Más alcance, más clientes, más crecimiento.</span>
+        </h1>
+        <p class="hero__subtitle">Creamos los sistemas que convierten tus oportunidades en ingresos reales.</p>
+        <div class="hero__actions">
+          <a href="#contacto" class="btn btn--gold">Agendar llamada<span class="btn__arrow" aria-hidden="true">→</span></a>
+        </div>
+      </div>
+
+      <!-- pain pills: rise in a scattered stream, passing over the docked title -->
+      <ul class="act__pains" data-pains>
+        <li class="pain" data-pain>
+          <svg class="pain__ico" viewBox="0 0 24 24" aria-hidden="true"><polyline points="3 17 9 11 13 15 21 6"/><polyline points="15 6 21 6 21 12"/></svg>
+          No tener un sistema predecible de ventas.
+        </li>
+        <li class="pain" data-pain>
+          <svg class="pain__ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5h16A1.5 1.5 0 0 1 21.5 7v8a1.5 1.5 0 0 1-1.5 1.5H9l-4 3.5V16.5H4A1.5 1.5 0 0 1 2.5 15V7A1.5 1.5 0 0 1 4 5.5z"/></svg>
+          Depender del boca a boca para crecer.
+        </li>
+        <li class="pain" data-pain>
+          <svg class="pain__ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10v4a1 1 0 0 0 1 1h2l5 4V5L7 9H5a1 1 0 0 0-1 1z"/><path d="M16.5 9a3.5 3.5 0 0 1 0 6"/></svg>
+          Gastar en publicidad sin medir el retorno.
+        </li>
+        <li class="pain" data-pain>
+          <svg class="pain__ico" viewBox="0 0 24 24" aria-hidden="true"><polyline points="17 1.5 21 5.5 17 9.5"/><path d="M3 11.5v-2a4 4 0 0 1 4-4h14"/><polyline points="7 22.5 3 18.5 7 14.5"/><path d="M21 12.5v2a4 4 0 0 1-4 4H3"/></svg>
+          Perder horas en tareas manuales repetitivas.
+        </li>
+        <li class="pain" data-pain>
+          <svg class="pain__ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg>
+          Falta de seguimiento a los leads captados.
+        </li>
+      </ul>
+
+      <!-- solution — NO glass pill. The title rises IN FRONT of the 3D ZV
+           (lifted off it with a drop shadow); the subtitle + button trail a bit
+           lower and rise a bit slower, then catch up during the handoff so the
+           group fuses and crossfades into the "Nuestros servicios" title. -->
+      <div class="solution" data-solution aria-hidden="true">
+        <h2 class="solution__title" data-sol-title>Nosotros lo solucionamos:</h2>
+        <div class="solution__body" data-sol-body>
+          <p class="solution__sub">Creamos sistemas, herramientas y estrategias que generan resultados y crecimiento <span class="text-gold">medibles</span>.</p>
+          <a href="#competencias" class="btn btn--gold solution__btn">Descubre cómo<span class="btn__arrow" aria-hidden="true">→</span></a>
+        </div>
+      </div>
+
+      <p class="act__cue" aria-hidden="true"><span>Desliza</span><i></i></p>
+    </div>
+  </section>
+
+  <!-- ============================ SERVICES ============================
+       "Nuestros servicios" pins under the nav for the whole section while
+       the service texts rise and dissolve behind it, and edge-fitted 3D
+       videos (rendered on black, so they blend with the page) play scrubbed
+       by scroll. On mobile the videos move inline, full-width, above each text.
+       ================================================================= -->
+  <section class="services" id="competencias" data-services>
+
+    <!-- fitted video layer: 3D renders on black, anchored to the viewport edges.
+         preload=auto + an online fallback (data-fallback) so a missing/blocked
+         local file swaps to the hosted copy instead of failing silently. -->
+    <div class="services__videos" data-svc-videos aria-hidden="true">
+      <video class="svc-vid svc-vid--fill"  data-svc-vid="0" data-src-desktop="assets/escritorio/01_Clientes.mp4"  data-src-mobile="assets/movil/01_Clientes_movil.mp4"  data-fallback="https://thecesaryf-collab.github.io/cliente-banners/01_Clientes.mp4"  muted playsinline preload="auto"></video>
+      <video class="svc-vid svc-vid--right" data-svc-vid="1" data-src-desktop="assets/escritorio/02_Claqueta.mp4"  data-src-mobile="assets/movil/02_Claqueta_movil.mp4"  data-fallback="https://thecesaryf-collab.github.io/cliente-banners/02_Claqueta.mp4"  muted playsinline preload="auto"></video>
+      <video class="svc-vid svc-vid--left"  data-svc-vid="2" data-src-desktop="assets/escritorio/03_Movil.mp4"     data-src-mobile="assets/movil/03_Movil_movil.mp4"     data-fallback="https://thecesaryf-collab.github.io/cliente-banners/03_Movil.mp4"     muted playsinline preload="auto"></video>
+      <video class="svc-vid svc-vid--right" data-svc-vid="3" data-src-desktop="assets/escritorio/04_Ordenador.mp4" data-src-mobile="assets/movil/04_Ordenador_movil.mp4" data-fallback="https://thecesaryf-collab.github.io/cliente-banners/04_Ordenador.mp4" muted playsinline preload="auto"></video>
+    </div>
+
+    <!-- sticky title: stays pinned under the nav for the whole section, with a
+         soft black-gradient + blur banner behind it so rising text dissolves -->
+    <div class="services__titlebar">
+      <div class="services__mask" aria-hidden="true"></div>
+      <h2 class="services__title">Nuestros <span class="text-gold">servicios</span></h2>
+    </div>
+
+    <!-- text blocks rise and disappear behind the pinned title -->
+    <div class="services__text">
+      <article class="svc svc--right" data-svc-block>
+        <span class="svc__index">01</span>
+        <h3 class="svc__title">Captamos clientes.</h3>
+        <p class="svc__desc">Implementamos estrategias de captación para atraer clientes de calidad, aumentar tus ventas y posicionarte por encima de la competencia.</p>
+      </article>
+
+      <article class="svc svc--left" data-svc-block>
+        <span class="svc__index">02</span>
+        <h3 class="svc__title">Diseñamos imagen.</h3>
+        <p class="svc__desc">Creamos contenido audiovisual, piezas publicitarias e identidad visual para convertir atención en confianza, y confianza en clientes.</p>
+      </article>
+
+      <article class="svc svc--right" data-svc-block>
+        <span class="svc__index">03</span>
+        <h3 class="svc__title">Creamos presencia.</h3>
+        <p class="svc__desc">Construimos una presencia digital estratégica diseñada para atraer atención, generar confianza y multiplicar oportunidades.</p>
+      </article>
+
+      <article class="svc svc--left" data-svc-block>
+        <span class="svc__index">04</span>
+        <h3 class="svc__title">Digitalizamos procesos.</h3>
+        <p class="svc__desc">Mejoramos la eficiencia y la facturación de tu negocio con herramientas modernas e inteligencia artificial.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- ============================ TESTIMONIALS ============================ -->
+  <section class="voices" id="opiniones" data-voices>
+    <div class="voices__head" data-reveal>
+      <h2 class="voices__heading">La voz de <span class="text-gold">nuestros clientes</span></h2>
+    </div>
+
+    <div class="voices__track-wrap" data-marquee data-reveal style="--rd:.12s">
+      <div class="voices__track" data-marquee-track>
+        <!-- Cards are duplicated in JS for a seamless loop -->
+        <article class="vcard">
+          <header class="vcard__head"><span class="vcard__avatar" data-initial="A">A</span><div><p class="vcard__name">Ana Martínez</p><p class="vcard__role">Servicios profesionales</p></div></header>
+          <div class="vcard__stars" aria-label="5 de 5">★★★★★</div>
+          <p class="vcard__text">Excelente servicio. ZV Consulting nos ayudó a triplicar nuestra captación de leads en solo tres meses.</p>
+        </article>
+        <article class="vcard">
+          <header class="vcard__head"><span class="vcard__avatar" data-initial="C">C</span><div><p class="vcard__name">Carlos Rodríguez</p><p class="vcard__role">Marca de consumo</p></div></header>
+          <div class="vcard__stars" aria-label="5 de 5">★★★★★</div>
+          <p class="vcard__text">La producción audiovisual fue de primera clase. Ha mejorado significativamente la percepción de nuestra marca.</p>
+        </article>
+        <article class="vcard">
+          <header class="vcard__head"><span class="vcard__avatar" data-initial="M">M</span><div><p class="vcard__name">Marina Soler</p><p class="vcard__role">E-commerce</p></div></header>
+          <div class="vcard__stars" aria-label="5 de 5">★★★★★</div>
+          <p class="vcard__text">Muy profesionales en el diseño de nuestra web. El tráfico ha aumentado notablemente desde el rediseño.</p>
+        </article>
+        <article class="vcard">
+          <header class="vcard__head"><span class="vcard__avatar" data-initial="D">D</span><div><p class="vcard__name">Diego Ferreiro</p><p class="vcard__role">Hostelería</p></div></header>
+          <div class="vcard__stars" aria-label="5 de 5">★★★★★</div>
+          <p class="vcard__text">Gran equipo de redes sociales. Nuestras campañas son mucho más efectivas y consistentes ahora.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ PROCESS ============================ -->
+  <section class="process" id="proceso" data-process>
+    <div class="process__head" data-reveal>
+      <h2 class="process__heading">Nuestro proceso de <span class="text-gold">éxito</span></h2>
+    </div>
+
+    <ol class="steps">
+      <li class="step" data-step>
+        <span class="step__num">1</span>
+        <div class="step__body">
+          <h3 class="step__title">Estudio previo</h3>
+          <p class="step__desc">Analizamos en profundidad tu marca, tu público objetivo y tu competencia para construir una base sólida.</p>
+        </div>
+      </li>
+      <li class="step" data-step>
+        <span class="step__num">2</span>
+        <div class="step__body">
+          <h3 class="step__title">Desarrollo estratégico</h3>
+          <p class="step__desc">Creamos una campaña personalizada, definiendo canales, mensajes clave y tácticas de alto impacto.</p>
+        </div>
+      </li>
+      <li class="step" data-step>
+        <span class="step__num">3</span>
+        <div class="step__body">
+          <h3 class="step__title">Ejecución y resultados</h3>
+          <p class="step__desc">Lanzamos la campaña y recopilamos datos en tiempo real. Informes detallados y transparentes.</p>
+        </div>
+      </li>
+      <li class="step" data-step>
+        <span class="step__num">4</span>
+        <div class="step__body">
+          <h3 class="step__title">Optimización continua</h3>
+          <p class="step__desc">No nos detenemos. Con los datos, ajustamos y escalamos para maximizar el retorno de la inversión.</p>
+        </div>
+      </li>
+    </ol>
+
+    <div class="clients" data-reveal>
+      <p class="clients__label">Marcas que confían</p>
+      <div class="clients__row">
+        <span class="clients__logo">NOVA</span>
+        <span class="clients__logo">Áureo</span>
+        <span class="clients__logo">MERIDIAN</span>
+        <span class="clients__logo">Lumen</span>
+        <span class="clients__logo">CASTELL</span>
+        <span class="clients__logo">Verde&amp;Co</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ CONTACT ============================ -->
+  <section class="contact" id="contacto" data-contact>
+    <div class="contact__parallax" aria-hidden="true" data-contact-parallax></div>
+    <div class="contact__inner">
+      <header class="contact__head" data-reveal>
+        <h2 class="contact__heading">¿Te ayudamos?</h2>
+        <p class="contact__lead">Cuéntanos dónde estás y a dónde quieres llegar. Te respondemos con un plan, no con un discurso.</p>
+      </header>
+
+      <div class="contact__cols">
+        <!-- Columna: datos + mapa -->
+        <div class="contact__col" data-reveal>
+          <p class="contact__col-eyebrow">Contacto</p>
+
+          <ul class="contact__details">
+            <li><span class="contact__det-label">Estudio</span><a href="https://maps.google.com/?q=C.+Lastres+4+Gijón" target="_blank" rel="noopener">C. Lastres, 4, bajo 6 · Centro, 33207 Gijón, Asturias</a></li>
+            <li><span class="contact__det-label">Email</span><a href="mailto:info@zvconsulting.com">info@zvconsulting.com</a></li>
+            <li><span class="contact__det-label">Teléfono</span><a href="tel:+34608631224">+34 608 631 224</a></li>
+          </ul>
+
+          <div class="contact__map">
+            <iframe title="Ubicación de ZV Consulting en Gijón" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://www.google.com/maps?q=C.+Lastres+4,+33207+Gij%C3%B3n,+Asturias&output=embed"></iframe>
+          </div>
+        </div>
+
+        <!-- Columna: formulario -->
+        <form class="contact__col contact__form" data-contact-form novalidate data-reveal style="--rd:.12s">
+          <p class="contact__col-eyebrow">Háblanos de ti</p>
+          <label class="field">
+            <span class="field__label">Tu nombre completo</span>
+            <input type="text" name="name" autocomplete="name" required placeholder="Nombre y apellidos" />
+          </label>
+          <label class="field">
+            <span class="field__label">Tu correo electrónico</span>
+            <input type="email" name="email" autocomplete="email" required placeholder="tunombre@empresa.com" />
+          </label>
+          <label class="field field--grow">
+            <span class="field__label">Cuéntanos</span>
+            <textarea name="message" rows="4" required placeholder="Detalles de tu proyecto o consulta…"></textarea>
+          </label>
+          <button type="submit" class="btn btn--gold btn--block">Enviar consulta<span class="btn__arrow" aria-hidden="true">→</span></button>
+          <p class="contact__form-note" data-form-note aria-live="polite"></p>
+        </form>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- ============================ FOOTER ============================ -->
+<footer class="footer" data-reveal>
+  <div class="footer__brand">
+    <img src="ZV_logo.png" alt="" width="36" height="36" />
+    <span>ZV Consulting</span>
+  </div>
+  <nav class="footer__nav" aria-label="Pie">
+    <a href="#inicio">Inicio</a>
+    <a href="#competencias">Competencias</a>
+    <a href="#opiniones">Opiniones</a>
+    <a href="#proceso">Proceso</a>
+    <a href="#contacto">Contacto</a>
+  </nav>
+  <p class="footer__legal">© 2026 ZV Consulting. Todos los derechos reservados.</p>
+</footer>
+
+<!-- ============================ WHATSAPP FLOAT ============================ -->
+<a class="wa" href="https://wa.me/34608631224" target="_blank" rel="noopener" data-wa aria-label="Escríbenos por WhatsApp">
+  <span class="wa__bubble" data-wa-bubble>Dinos en qué te podemos ayudar</span>
+  <span class="wa__btn">
+    <svg viewBox="0 0 32 32" width="28" height="28" aria-hidden="true" fill="currentColor"><path d="M16 3C9.4 3 4 8.4 4 15c0 2.1.6 4.2 1.6 6L4 29l8.2-1.6c1.8.9 3.8 1.4 5.8 1.4 6.6 0 12-5.4 12-12S22.6 3 16 3zm0 21.8c-1.8 0-3.5-.5-5-1.4l-.4-.2-4.9 1 1-4.8-.2-.4c-1-1.6-1.5-3.4-1.5-5.3C5.5 9.5 10.2 4.8 16 4.8S26.5 9.5 26.5 15.3 21.8 24.8 16 24.8zm5.7-7.1c-.3-.2-1.8-.9-2.1-1-.3-.1-.5-.2-.7.2-.2.3-.8 1-1 1.2-.2.2-.4.2-.7 0-.3-.2-1.3-.5-2.5-1.5-.9-.8-1.5-1.8-1.7-2.1-.2-.3 0-.5.1-.7.1-.1.3-.4.5-.6.1-.2.2-.3.3-.5.1-.2 0-.4 0-.6-.1-.2-.7-1.7-1-2.3-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.2.2 2.1 3.3 5.2 4.6.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.4.3-.7.3-1.3.2-1.4-.1-.2-.3-.2-.6-.4z"/></svg>
+  </span>
+</a>
+
+<script type="module" src="js/main.js"></script>

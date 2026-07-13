@@ -1,0 +1,12 @@
+.git
+.gitignore
+.DS_Store
+**/.DS_Store
+capturas_inspiracion
+REFERENCIA_SERV
+.claude
+.vscode
+.idea
+Dockerfile
+.dockerignore
+README.md

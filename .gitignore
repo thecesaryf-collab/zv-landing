@@ -1,0 +1,12 @@
+# macOS
+.DS_Store
+**/.DS_Store
+
+# Carpetas de trabajo (no van a producción)
+capturas_inspiracion/
+REFERENCIA_SERV/
+.claude/
+
+# Editores
+.vscode/
+.idea/

@@ -1,0 +1,719 @@
+/* =====================================================================
+   ZV CONSULTING — sections.css
+   nav · hero · choreography · services · voices · process · contact · footer · wa
+   ===================================================================== */
+
+/* ============================ NAV ============================ */
+.nav {
+  position: fixed;
+  top: clamp(0.7rem, 2vw, 1.4rem);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  width: min(1180px, calc(100% - 2 * clamp(0.9rem, 4vw, 2rem)));
+}
+.nav__pill {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.7rem 0.7rem 0.7rem 1.15rem;
+  border-radius: 100px;
+  /* Fuses with background until scrolled — barely-there edges */
+  background: rgba(20, 15, 10, calc(0.04 + 0.55 * var(--nav-solid)));
+  border: 1px solid rgba(233, 205, 155, calc(0.04 + 0.14 * var(--nav-solid)));
+  backdrop-filter: blur(calc(2px + 14px * var(--nav-solid))) saturate(1.2);
+  -webkit-backdrop-filter: blur(calc(2px + 14px * var(--nav-solid))) saturate(1.2);
+  box-shadow: 0 18px 40px -24px rgba(0, 0, 0, calc(0.2 + 0.6 * var(--nav-solid)));
+  transition: padding 0.5s var(--ease-out);
+}
+.nav.is-scrolled .nav__pill { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+
+.nav__brand { display: inline-flex; align-items: center; gap: 0.55rem; }
+.nav__logo { width: 34px; height: 34px; object-fit: contain;
+  filter: brightness(0) invert(1) drop-shadow(0 0 8px rgba(217,169,78,0.3)); }
+.nav__brand-text {
+  font-family: var(--font-display); font-size: 1.05rem; letter-spacing: 0.02em;
+  color: var(--cream);
+}
+.nav__links { display: flex; align-items: center; gap: 0.35rem; }
+.nav__link {
+  padding: 0.55rem 0.95rem; border-radius: 100px;
+  font-size: var(--step--1); font-weight: 500; letter-spacing: 0.01em;
+  color: var(--cream-soft);
+  transition: color 0.3s var(--ease-out), background 0.3s var(--ease-out);
+}
+.nav__link:hover { color: var(--cream); background: rgba(244,236,220,0.06); }
+.nav__link--cta {
+  background: linear-gradient(135deg, var(--gold-lit), var(--gold) 60%, var(--gold-deep));
+  color: #241706; font-weight: 600;
+  box-shadow: 0 8px 20px -10px rgba(217,169,78,0.6);
+}
+.nav__link--cta:hover { background: linear-gradient(135deg, var(--gold-lit), var(--gold)); color:#241706; }
+
+.nav__burger {
+  display: none;
+  width: 44px; height: 44px; border-radius: 100px;
+  border: 1px solid var(--line-strong);
+  flex-direction: column; align-items: center; justify-content: center; gap: 5px;
+}
+.nav__burger span {
+  width: 18px; height: 1.5px; background: var(--cream); border-radius: 2px;
+  transition: transform 0.4s var(--ease-out), opacity 0.3s;
+}
+.nav__burger.is-open span:nth-child(1) { transform: translateY(3.25px) rotate(45deg); }
+.nav__burger.is-open span:nth-child(2) { transform: translateY(-3.25px) rotate(-45deg); }
+
+/* Fullscreen mobile menu */
+.mobile-menu {
+  position: fixed; inset: 0; z-index: 90;
+  background: linear-gradient(160deg, #120d09, var(--noir) 70%);
+  display: flex; flex-direction: column; justify-content: center;
+  padding: 0 var(--pad-x);
+  opacity: 0; visibility: hidden;
+  clip-path: circle(0% at calc(100% - 40px) 40px);
+  transition: clip-path 0.7s var(--ease-out), opacity 0.4s ease, visibility 0.4s;
+}
+.mobile-menu.is-open { opacity: 1; visibility: visible; clip-path: circle(150% at calc(100% - 40px) 40px); }
+.mobile-menu__nav { display: flex; flex-direction: column; gap: 0.2rem; }
+.mobile-menu__link {
+  font-family: var(--font-display); font-size: clamp(2.4rem, 12vw, 4rem);
+  line-height: 1.15; color: var(--cream); overflow: hidden;
+}
+.mobile-menu__link span {
+  display: inline-block; transform: translateY(110%);
+  transition: transform 0.6s var(--ease-out);
+}
+.mobile-menu.is-open .mobile-menu__link span { transform: translateY(0); }
+.mobile-menu__link:active { color: var(--gold-lit); }
+.mobile-menu__foot {
+  margin-top: 3rem; display: flex; flex-direction: column; gap: 0.35rem;
+  color: var(--cream-mute); font-size: var(--step--1); letter-spacing: 0.04em;
+  opacity: 0; transition: opacity 0.5s ease 0.4s;
+}
+.mobile-menu.is-open .mobile-menu__foot { opacity: 1; }
+
+/* ================= ACT: one pinned scroll sequence (hero + pain) =================
+   Driven by JS scroll vars on .act__sticky:
+     --hero-out  hero copy fades/lifts        --ignite   monogram lights
+     --warm      background warms up           --text-y   pain title vertical (vh)
+     --wipe      pain title left→right reveal   --mono-rise logo rises + shrinks
+   ================================================================================ */
+.act { position: relative; height: 480vh; background: #000; }  /* resolves to PURE black */
+.act__sticky {
+  position: sticky; top: 0; height: 100svh;
+  overflow: hidden; isolation: isolate;
+}
+
+/* --- background that warms as you scroll; the WHOLE warm layer fades out with
+       --dim so the act resolves to the pure-black .act behind it --- */
+.act__bg { position: absolute; inset: 0; z-index: 0;
+  background: radial-gradient(125% 90% at 50% 122%, #150e08 0%, #0a0806 48%);
+  opacity: calc(1 - var(--dim, 0)); }
+.act__bg::before {   /* warm pool behind the logo, grows with --warm */
+  content: ""; position: absolute; left: 50%; bottom: -16%; transform: translateX(-50%);
+  width: 100vw; height: 92vh;
+  background: radial-gradient(50% 50% at 50% 50%,
+              rgba(217,169,78,0.34), rgba(198,122,46,0.14) 38%, transparent 70%);
+  filter: blur(52px);
+  opacity: calc(0.12 + 0.88 * var(--warm, 0));
+}
+.act__bg::after {    /* overall warm lift from black */
+  content: ""; position: absolute; inset: 0;
+  background: radial-gradient(150% 105% at 50% 104%, rgba(120,68,24,0.30), transparent 62%);
+  opacity: var(--warm, 0);
+}
+/* subtle warm light seeping in from the edges/corners — present from the
+   very start (even with the ZV dark) and intensifying as --warm grows. */
+.act__corners {
+  position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(38% 48% at 0% 100%,   rgba(198,122,46, calc(0.10 + 0.24 * var(--warm,0))), transparent 62%),
+    radial-gradient(40% 50% at 100% 100%, rgba(217,169,78, calc(0.08 + 0.22 * var(--warm,0))), transparent 62%),
+    radial-gradient(34% 42% at 100% 0%,   rgba(198,122,46, calc(0.05 + 0.16 * var(--warm,0))), transparent 60%),
+    radial-gradient(32% 40% at 0% 0%,     rgba(150,86,30,  calc(0.05 + 0.14 * var(--warm,0))), transparent 60%);
+  filter: blur(6px);
+  opacity: calc(1 - var(--dim, 0));   /* edge warmth fades out with the ZV */
+}
+/* faint warm glows in the UPPER field (incl. behind the hero title) — present
+   from the very start, gently intensifying with --warm and drifting with scroll
+   so the top of the hero isn't dead-dark. */
+.act__aura {
+  position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(46% 40% at 50% 27%, rgba(217,169,78, calc(0.05 + 0.13 * var(--warm,0))), transparent 62%),
+    radial-gradient(38% 34% at 17% 33%, rgba(198,122,46, calc(0.04 + 0.10 * var(--warm,0))), transparent 60%),
+    radial-gradient(40% 34% at 84% 30%, rgba(217,169,78, calc(0.03 + 0.09 * var(--warm,0))), transparent 60%);
+  filter: blur(34px);
+  opacity: calc(1 - var(--dim, 0));
+  transform: translateY(calc(var(--aura-y, 0) * 1px));
+  will-change: transform, opacity;
+}
+
+/* --- pain title: LOWER layer, seen through the ZV's negative space --- */
+.act__paintext {
+  position: absolute; inset: 0; z-index: 1;
+  display: flex; align-items: center; justify-content: center; text-align: center;
+  padding: 0 7vw;
+  transform: translateY(calc(var(--text-y, 82) * 1vh));
+  opacity: var(--paint-op, 1);
+  filter: blur(calc(var(--paint-bl, 0) * 1px));
+  will-change: transform, opacity, filter;
+}
+.act__paintext span {
+  font-family: var(--font-display); font-weight: 400;
+  font-size: clamp(2.3rem, 6.2vw, 5.4rem); line-height: 1.04; letter-spacing: -0.02em;
+  color: var(--cream); max-width: 15ch;
+  /* left→right reveal driven by --wipe (0 → 1): a wide soft edge sweeps
+     across so each part fades in progressively rather than popping. */
+  -webkit-mask: linear-gradient(90deg, #000 calc(var(--wipe,0) * 150% - 40%),
+                rgba(0,0,0,0) calc(var(--wipe,0) * 150%));
+  mask: linear-gradient(90deg, #000 calc(var(--wipe,0) * 150% - 40%),
+                rgba(0,0,0,0) calc(var(--wipe,0) * 150%));
+}
+
+/* --- the SINGLE 3D monogram --- */
+.act__mono {
+  position: absolute; left: 50%; bottom: 0; z-index: 2;
+  width: min(106vh, 134vw); aspect-ratio: 1 / 1;
+  /* peek 44% → rise to -4% and shrink 40%, via --mono-rise */
+  transform: translate(-50%, calc(44% - var(--mono-rise, 0) * 48%))
+             scale(calc(1 - 0.4 * var(--mono-rise, 0)));
+  filter: drop-shadow(0 24px 55px rgba(0,0,0,0.6))
+          drop-shadow(0 0 calc(var(--ignite,0) * 95px) rgba(217,169,78, calc(var(--ignite,0) * 0.45)));
+  opacity: var(--mono-op, 1);        /* the whole object fades out as it powers off */
+  pointer-events: none; will-change: transform, opacity;
+}
+
+/* --- hero copy: TOP layer, scrolls straight up with the page (no fade) --- */
+.act__hero {
+  position: absolute; left: 50%; top: 23%; z-index: 3;
+  width: min(1000px, 92vw);
+  transform: translate(-50%, calc(var(--hero-y, 0) * 1px));
+  display: flex; flex-direction: column; align-items: center; gap: 1.5rem; text-align: center;
+  will-change: transform;
+}
+.act__hero.is-hidden { pointer-events: none; }
+
+.hero__title {
+  font-size: var(--step-5);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  color: var(--cream);
+  text-align: center;
+}
+/* The whole "Más + word" scales as ONE unit to a FIXED total width, so "Más"
+   and the word are always the SAME size; the block's HEIGHT varies per word
+   (a shorter word → scaled up → taller). --fit-w is the fixed layout width and
+   .hero__scale is scaled by --fit-scale to fill it exactly. */
+.hero__fit {
+  display: block;
+  width: var(--fit-w, auto);
+  margin: 0 auto;
+  white-space: nowrap;
+  /* the fixed-width box is centred on the page (margin:auto); anchor the scaled
+     block to its LEFT edge so "Más" always starts at the same x and only the
+     right side (the word) grows/shrinks — every combo ends up centred. */
+  text-align: left;
+}
+.hero__scale {
+  display: inline-flex;
+  align-items: baseline;
+  transform-origin: left center;
+  transform: scale(var(--fit-scale, 1));
+  transition: transform 0.6s var(--ease-io);
+  will-change: transform;
+}
+.hero__scale.is-instant { transition: none; }
+.hero__mas { font-family: var(--font-display); }
+/* the word "window" (mask): its width animates to the current word while the
+   list rolls up like a mechanical counter, clipped by the window rails */
+.ticker {
+  display: inline-block;
+  overflow: hidden;
+  height: 1.05em;
+  width: var(--mask-w, 6ch);
+  vertical-align: baseline;
+  transition: width 0.6s var(--ease-io);
+}
+.ticker.is-instant { transition: none; }
+.ticker__list {
+  transform: translateY(var(--list-y, 0));
+  transition: transform 0.6s var(--ease-io);
+}
+.ticker__list.is-instant { transition: none; }
+.ticker__list li {
+  width: max-content;      /* shrink to the word so we can measure its true width */
+  height: 1.05em;
+  line-height: 1.05;
+  font-style: italic;
+  color: var(--gold);
+  white-space: nowrap;
+}
+
+.hero__subtitle {
+  font-size: var(--step-1); font-weight: 300;
+  color: var(--cream-soft); max-width: 40ch; line-height: 1.5;
+}
+.hero__actions { display: flex; align-items: center; gap: 1.6rem; flex-wrap: wrap; justify-content: center; margin-top: 0.6rem; }
+.hero__link {
+  position: relative; font-size: var(--step-0); font-weight: 500; color: var(--cream-soft);
+  padding-bottom: 3px;
+  transition: color 0.3s var(--ease-out);
+}
+.hero__link::after {
+  content: ""; position: absolute; left: 0; bottom: 0; width: 100%; height: 1px;
+  background: var(--gold); transform: scaleX(0.35); transform-origin: left;
+  transition: transform 0.4s var(--ease-out);
+}
+.hero__link:hover { color: var(--gold-lit); }
+.hero__link:hover::after { transform: scaleX(1); }
+
+.act__cue {
+  position: absolute; bottom: 1.6rem; left: 50%; z-index: 5;
+  transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+  font-size: 0.72rem; letter-spacing: 0.28em; text-transform: uppercase; color: var(--cream-mute);
+  opacity: calc(1 - var(--cue-op, 0)); pointer-events: none;
+}
+.act__cue i {
+  width: 1px; height: 34px;
+  background: linear-gradient(var(--gold), transparent);
+  animation: cueDrop 2s var(--ease-io) infinite;
+  transform-origin: top;
+}
+@keyframes cueDrop { 0%{transform:scaleY(0);opacity:0} 40%{opacity:1} 100%{transform:scaleY(1);opacity:0} }
+
+/* -----------------------------------------------------------------
+   3D MONOGRAM COMPONENT (.mono)
+   The flat PNG silhouette is turned into a dimensional glass/obsidian
+   object: stacked offset copies fake extruded thickness, offset rim
+   layers catch a warm (top-left) and cool (bottom-right) edge light,
+   and a gold "ignite" layer floods the body as --ignite: 0 → 1.
+   ----------------------------------------------------------------- */
+.mono { position: relative; width: 100%; height: 100%; }
+.mono > span {
+  position: absolute; inset: 0;
+  -webkit-mask: url("../ZV_logo.png") center / contain no-repeat;
+  mask: url("../ZV_logo.png") center / contain no-repeat;
+  will-change: transform, opacity;
+}
+/* soft contact shadow cast down-behind the object */
+.mono__shadow {
+  background: #000;
+  transform: translateY(2.6%) scale(0.995);
+  filter: blur(30px);
+  opacity: calc(0.4 + 0.35 * var(--ignite));
+}
+/* extruded thickness — a dark copy pushed down-right */
+.mono__extrude {
+  background: linear-gradient(155deg, #100c08, #050403 70%);
+  transform: translate(6px, 9px);
+  filter: blur(0.5px);
+}
+/* cool counter-rim (teal), like the reference edge light */
+.mono__rim--cool {
+  background: linear-gradient(150deg, rgba(120,200,215,0) 46%,
+              rgba(96,158,172,0.5) 76%, rgba(168,232,242,0.9) 100%);
+  transform: translate(4px, 5px);
+  opacity: calc(0.28 + 0.4 * var(--ignite));
+  mix-blend-mode: screen;
+}
+/* warm key-rim (gold), top-left */
+.mono__rim--warm {
+  background: linear-gradient(158deg, var(--gold-lit) 0%, var(--gold) 34%,
+              rgba(120,80,20,0) 66%);
+  transform: translate(-3px, -4px);
+  opacity: calc(0.16 + 0.84 * var(--ignite));
+}
+/* obsidian body with a top-lit rounded-metal falloff */
+.mono__face {
+  background: linear-gradient(158deg, #33271b 0%, #1a130d 34%,
+              #0b0805 60%, #070504 78%, #1e150c 100%);
+}
+/* molten-gold ignite flood */
+.mono__glow {
+  background: linear-gradient(150deg, var(--gold-lit) 0%, var(--gold) 30%,
+              var(--gold-deep) 56%, #3a2710 86%);
+  /* capped below 1 so the dark face modelling still reads through when
+     fully lit — keeps the object dimensional instead of flat gold */
+  opacity: calc(var(--ignite) * 0.82);
+  mix-blend-mode: screen;
+}
+/* travelling specular streak */
+.mono__sheen {
+  background: linear-gradient(112deg, transparent 40%, rgba(255,247,224,0.95) 49%, transparent 57%);
+  background-size: 260% 260%;
+  opacity: calc(0.12 + 0.85 * var(--ignite));
+  mix-blend-mode: screen;
+  animation: sheen 7s var(--ease-io) infinite;
+}
+@keyframes sheen { 0%{background-position:130% 0} 100%{background-position:-50% 0} }
+@media (prefers-reduced-motion: reduce) { .mono__sheen { animation: none; } }
+
+/* --- pain pills: a scattered stream that rises with scroll (driven per
+       pill by JS: --py vh, --op opacity, --bl blur). --- */
+.act__pains { position: absolute; inset: 0; z-index: 4; pointer-events: none; list-style: none; }
+/* smoothly-animatable hover scale that composes with the per-frame transform */
+@property --pain-scale { syntax: "<number>"; inherits: false; initial-value: 1; }
+.pain {
+  position: absolute; top: 50%; left: 50%;
+  display: flex; align-items: center; gap: 1rem;
+  width: min(27rem, 78vw); padding: 1.1rem 1.6rem;
+  border-radius: 999px;                 /* fully rounded */
+  background: rgba(32, 23, 14, 0.30);
+  border: 1px solid var(--line-strong);
+  backdrop-filter: blur(20px) saturate(1.3);
+  -webkit-backdrop-filter: blur(20px) saturate(1.3);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.10), 0 34px 60px -34px rgba(0,0,0,0.95);
+  font-size: var(--step-0); font-weight: 400; color: var(--cream);
+  /* centred column with a small alternating left/right deviation (--dx), plus a
+     hover scale (--pain-scale) that eases via @property while the rAF keeps
+     updating --py/--dx every frame */
+  transform: translate(calc(-50% + var(--dx, 0)), calc(var(--py, 60) * 1vh))
+             scale(var(--pain-scale, 1));
+  opacity: var(--op, 0);
+  filter: blur(calc(var(--bl, 0) * 1px));
+  pointer-events: auto;                  /* so the chips react to the cursor */
+  transition: --pain-scale 0.4s var(--ease-out), border-color 0.4s var(--ease-out),
+              background 0.4s var(--ease-out), box-shadow 0.4s var(--ease-out);
+  will-change: transform, opacity, filter;
+}
+@media (hover: hover) {
+  .pain:hover {
+    --pain-scale: 1.06;
+    border-color: var(--gold);
+    background: rgba(46, 33, 18, 0.5);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.16),
+                0 26px 60px -30px rgba(0,0,0,0.95),
+                0 0 34px -6px rgba(217,169,78,0.4);
+  }
+  .pain:hover .pain__ico { color: var(--gold-lit); }
+}
+.act__pains .pain:nth-child(1) { --dx: -6vw; }
+.act__pains .pain:nth-child(2) { --dx:  6vw; }
+.act__pains .pain:nth-child(3) { --dx: -4vw; }
+.act__pains .pain:nth-child(4) { --dx:  5vw; }
+.act__pains .pain:nth-child(5) { --dx: -5vw; }
+/* thin-stroke line icon per pain point (in gold), replacing the number */
+.pain__ico {
+  flex: none;
+  width: 1.55em; height: 1.55em;
+  color: var(--gold);
+  stroke: currentColor; fill: none;
+  stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round;
+  padding-right: 1rem; border-right: 1px solid var(--line-strong);
+  box-sizing: content-box;
+  transition: color 0.4s var(--ease-out);
+}
+
+/* --- solution: a LOOSE composition (no glass pill) that passes in FRONT of
+       the ZV. Title, subtitle and button are positioned independently by JS
+       (--sol-y in vh, --sol-op) so they can rise at different speeds and then
+       converge during the handoff. --- */
+.solution { position: absolute; inset: 0; z-index: 6; pointer-events: none; }
+.solution__title, .solution__body {
+  position: absolute; top: 0; left: 50%;
+  width: min(64rem, 94vw);
+  transform: translate(-50%, calc(var(--sol-y, 60) * 1vh));
+  opacity: var(--sol-op, 0);
+  text-align: center;
+  will-change: transform, opacity;
+}
+/* same size + typography as the pain title "Tu negocio pierde dinero cada
+   día por…" (.act__paintext span) so the two big statements feel like a pair */
+.solution__title {
+  font-family: var(--font-display); font-weight: 400;
+  font-size: clamp(2.3rem, 6.2vw, 5.4rem); line-height: 1.04; letter-spacing: -0.02em;
+  color: #ffffff;
+  /* lifted off the busy gold ZV behind it with a soft parallel drop shadow */
+  text-shadow: 0 2px 26px rgba(0,0,0,0.9), 0 8px 18px rgba(0,0,0,0.55),
+               0 1px 2px rgba(0,0,0,0.8);
+  /* left→right reveal (same as the pain title), driven by --sol-wipe 0 → 1 */
+  -webkit-mask: linear-gradient(90deg, #000 calc(var(--sol-wipe,1) * 150% - 40%),
+                rgba(0,0,0,0) calc(var(--sol-wipe,1) * 150%));
+  mask: linear-gradient(90deg, #000 calc(var(--sol-wipe,1) * 150% - 40%),
+                rgba(0,0,0,0) calc(var(--sol-wipe,1) * 150%));
+}
+.solution__body { display: flex; flex-direction: column; align-items: center; gap: 1.3rem; }
+.solution__sub {
+  font-size: var(--step-1); font-weight: 300; color: var(--cream);
+  max-width: 46ch; line-height: 1.5;
+  text-shadow: 0 2px 18px rgba(0,0,0,0.85), 0 1px 2px rgba(0,0,0,0.7);
+  /* the subtitle wipes in just after the title (inherits --sol-wipe from body) */
+  -webkit-mask: linear-gradient(90deg, #000 calc(var(--sol-wipe,1) * 150% - 40%),
+                rgba(0,0,0,0) calc(var(--sol-wipe,1) * 150%));
+  mask: linear-gradient(90deg, #000 calc(var(--sol-wipe,1) * 150% - 40%),
+                rgba(0,0,0,0) calc(var(--sol-wipe,1) * 150%));
+}
+.solution__btn { pointer-events: auto; }
+
+@media (prefers-reduced-motion: reduce) {
+  .pain { opacity: 1; --py: 0; }
+}
+
+/* ============================ SERVICES ============================
+   The "Nuestros servicios" title pins under the nav for the whole section
+   (position: sticky). Service texts scroll up and dissolve behind a soft
+   black-gradient + blur banner attached to that title. Edge-fitted videos
+   (3D renders on black) play scrubbed by scroll from a fixed layer. */
+.services {
+  position: relative; z-index: 5;
+  /* transparent over the overlap (top 80vh) so the act's dimming ZV shows
+     through the handoff, then PURE black for the rest of the section */
+  background: linear-gradient(to bottom, transparent 0, transparent 80vh, #000 80vh, #000 100%);
+  /* overlap the tail of the act: the first service is already rising and
+     playing while the solution fuses into the "Nuestros servicios" title and
+     the ZV / background fade to black. No separate curtain. */
+  margin-top: -80vh;
+  padding: 0 0 clamp(5rem, 12vh, 10rem);
+}
+
+/* --- fitted video layer: pinned to the viewport, videos anchored to edges.
+       Videos are 3D renders on pure black, so they blend into the page. --- */
+.services__videos { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
+.svc-vid { position: absolute; display: none; object-fit: cover; }
+/* 01 — full-height on the left edge */
+.svc-vid--fill  { left: 0; top: 0; height: 100vh; width: auto; }
+/* 02 / 04 — right-bottom corner */
+.svc-vid--right { right: 0; bottom: 0; width: 35vw; max-width: 550px; height: auto; border-radius: 16px 0 0 0; }
+/* 03 — left-bottom corner */
+.svc-vid--left  { left: 0;  bottom: 0; width: 35vw; max-width: 550px; height: auto; border-radius: 0 16px 0 0; }
+@media (min-width: 1600px) { .svc-vid--right, .svc-vid--left { width: 50vw; max-width: 850px; } }
+
+/* --- pinned title + its dissolve banner ---
+   Fixed at the dock so it appears at the EXACT spot the conclusion pill docks
+   (a true crossfade/morph), then stays put while the section scrolls behind it.
+   Opacity is a product: --svc-title-in (act.js, morph fade-in) × --svc-title-out
+   (services.js, fade-out at the end of the section). */
+.services__titlebar {
+  position: fixed; top: clamp(78px, 11vh, 122px); left: 0; right: 0; z-index: 40;
+  display: flex; justify-content: center;
+  pointer-events: none;
+  opacity: calc(var(--svc-title-in, 0) * var(--svc-title-out, 1));
+  will-change: opacity;
+}
+.services__title {
+  font-size: var(--step-4); text-align: center; line-height: 1.05;
+  text-shadow: 0 8px 30px rgba(0,0,0,0.75);
+  /* rides up from the bubble's height to the dock during the morph, then rests */
+  transform: translateY(calc(var(--svc-title-y, 0) * 1vh));
+  will-change: transform;
+}
+/* black-gradient + backdrop-blur band behind the title: rising text fades to
+   black and softens as it passes into this zone before vanishing under the title */
+.services__mask {
+  position: absolute; top: -13vh; left: 50%; transform: translateX(-50%);
+  width: 150vw; height: 36vh; z-index: -1; pointer-events: none;
+  background: linear-gradient(to bottom,
+              rgba(10,8,6,0.94) 0%, rgba(10,8,6,0.72) 42%, transparent 100%);
+  backdrop-filter: blur(9px); -webkit-backdrop-filter: blur(9px);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 52%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 52%, transparent 100%);
+}
+
+/* --- scrolling text column (spacing copied from the prototype) --- */
+.services__text {
+  position: relative; z-index: 2;
+  max-width: 1200px; margin-inline: auto; padding-inline: 25px;
+  /* dead zone: the title finishes docking before the first block rises */
+  padding-top: 22vh;
+}
+.svc {
+  margin-bottom: 60vh;     /* big gap so each video gets a full scroll to scrub */
+  max-width: 45%;
+}
+.svc--right { margin-left: auto;  text-align: left; padding-right: 8vw; }  /* text right, video 01/03 left */
+.svc--left  { margin-right: auto; text-align: left; padding-left: 8vw;  }  /* text left,  video 02/04 right */
+.svc__index {
+  font-family: var(--font-display); font-size: var(--step-2); color: var(--gold);
+  display: block; margin-bottom: 0.4rem; opacity: 0.9;
+}
+.svc__title { font-size: clamp(2.6rem, 5vw, 5.2rem); line-height: 1.05; margin-bottom: 1.3rem; }
+.svc__desc { color: var(--cream-soft); font-size: clamp(1.05rem, 1.5vw, 1.7rem); font-weight: 300; line-height: 1.5; }
+
+/* ============================ VOICES (testimonials) ============================ */
+.voices { padding: clamp(5rem, 12vh, 9rem) 0; overflow: hidden; }
+.voices__head { max-width: var(--maxw); margin: 0 auto clamp(2.5rem,6vh,4rem); padding-inline: var(--pad-x); }
+.voices__heading { font-size: var(--step-4); }
+
+.voices__track-wrap {
+  -webkit-mask: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  mask: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+.voices__track { display: flex; gap: 1.4rem; width: max-content; will-change: transform; }
+.vcard {
+  width: min(80vw, 380px);
+  flex: none;
+  padding: 1.8rem;
+  border-radius: var(--radius);
+  background: linear-gradient(165deg, rgba(33,24,18,0.9), rgba(16,11,8,0.9));
+  border: 1px solid var(--line);
+  box-shadow: 0 30px 60px -40px rgba(0,0,0,0.9), inset 0 1px 0 rgba(255,255,255,0.04);
+  display: flex; flex-direction: column; gap: 1.1rem;
+  transition: border-color 0.4s var(--ease-out), transform 0.4s var(--ease-out);
+}
+.vcard:hover { border-color: var(--line-strong); transform: translateY(-4px); }
+.vcard__head { display: flex; align-items: center; gap: 0.9rem; }
+.vcard__avatar {
+  width: 48px; height: 48px; border-radius: 50%; flex: none;
+  display: grid; place-items: center;
+  font-family: var(--font-display); font-size: 1.25rem; color: #241706;
+  background: linear-gradient(135deg, var(--gold-lit), var(--gold-deep));
+  box-shadow: 0 8px 18px -8px rgba(217,169,78,0.6);
+}
+.vcard__name { font-weight: 600; font-size: var(--step-0); }
+.vcard__role { font-size: var(--step--1); color: var(--cream-mute); }
+.vcard__stars { color: var(--gold); letter-spacing: 0.15em; font-size: 0.95rem; }
+.vcard__text { color: var(--cream-soft); font-size: var(--step-0); line-height: 1.55; font-weight: 300; }
+
+/* ============================ PROCESS ============================ */
+.process { padding: clamp(5rem, 12vh, 9rem) 0; background: var(--noir-2); }
+.process__head { max-width: var(--maxw); margin: 0 auto clamp(3rem,7vh,5rem); padding-inline: var(--pad-x); max-width: 720px; text-align: center; }
+.process__heading { font-size: var(--step-4); margin: 0 0 1.2rem; }
+.process__lead { color: var(--cream-soft); font-weight: 300; font-size: var(--step-1); }
+
+.steps {
+  max-width: var(--maxw); margin-inline: auto; padding-inline: var(--pad-x);
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.4rem;
+}
+.step {
+  position: relative; padding: 2rem 1.6rem;
+  border-top: 1px solid var(--line-strong);
+  opacity: 0; transform: translateY(30px);
+  transition: opacity 0.8s var(--ease-out), transform 0.8s var(--ease-out);
+}
+.step.is-in { opacity: 1; transform: none; }
+.step__num {
+  font-family: var(--font-display); font-size: clamp(3rem, 6vw, 5rem);
+  line-height: 1; color: transparent;
+  -webkit-text-stroke: 1px var(--gold);
+  display: block; margin-bottom: 1rem;
+  transition: color 0.5s var(--ease-out);
+}
+.step:hover .step__num { color: var(--gold); }
+.step__title { font-size: var(--step-1); margin-bottom: 0.7rem; }
+.step__desc { color: var(--cream-mute); font-size: var(--step-0); font-weight: 300; line-height: 1.5; }
+@media (prefers-reduced-motion: reduce) { .step { opacity: 1; transform: none; } }
+
+.clients { max-width: var(--maxw); margin: clamp(4rem,9vh,7rem) auto 0; padding-inline: var(--pad-x); text-align: center; }
+.clients__label { font-size: var(--step--1); letter-spacing: 0.24em; text-transform: uppercase; color: var(--cream-mute); margin-bottom: 1.8rem; }
+.clients__row {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
+  gap: clamp(1.6rem, 5vw, 4rem);
+}
+.clients__logo {
+  font-family: var(--font-display); font-size: clamp(1.2rem, 2.6vw, 1.8rem);
+  letter-spacing: 0.04em; color: var(--cream-faint);
+  transition: color 0.4s var(--ease-out); cursor: default;
+}
+.clients__logo:hover { color: var(--gold); }
+
+/* ============================ CONTACT ============================ */
+.contact { position: relative; overflow: hidden; padding: clamp(5rem,12vh,9rem) 0; }
+.contact__parallax {
+  position: absolute; inset: -20% 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(60% 50% at 18% 20%, rgba(198,122,46,0.28), transparent 60%),
+    radial-gradient(55% 45% at 85% 80%, rgba(217,169,78,0.20), transparent 60%);
+  will-change: transform;
+}
+.contact__inner {
+  position: relative; z-index: 1;
+  max-width: var(--maxw); margin-inline: auto; padding-inline: var(--pad-x);
+}
+/* "¿Te ayudamos?" heads the whole section */
+.contact__head { text-align: center; max-width: 48ch; margin: 0 auto clamp(2.5rem, 6vh, 4rem); }
+.contact__heading { font-size: var(--step-4); margin: 0 0 1.1rem; white-space: nowrap; }
+.contact__lead { color: var(--cream-soft); font-weight: 300; font-size: var(--step-1); margin-inline: auto; }
+
+/* two symmetric columns of equal height under the shared heading */
+.contact__cols {
+  display: grid; grid-template-columns: 1fr 1fr; gap: clamp(1.5rem, 4vw, 3rem);
+  align-items: stretch;
+}
+.contact__col {
+  display: flex; flex-direction: column; gap: 1.1rem;
+  background: linear-gradient(165deg, rgba(33,24,18,0.7), rgba(16,11,8,0.7));
+  border: 1px solid var(--line); border-radius: var(--radius-lg);
+  padding: clamp(1.6rem, 3vw, 2.6rem);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 40px 80px -50px rgba(0,0,0,0.95), inset 0 1px 0 rgba(255,255,255,0.05);
+}
+.contact__col-eyebrow { font-family: var(--font-display); font-size: var(--step-2); line-height: 1.1; }
+
+.contact__details { margin: 0.4rem 0; display: flex; flex-direction: column; gap: 1.1rem; }
+.contact__details li { display: flex; flex-direction: column; gap: 0.15rem; }
+.contact__det-label { font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); }
+.contact__details a { color: var(--cream); font-size: var(--step-0); transition: color 0.3s; }
+.contact__details a:hover { color: var(--gold-lit); }
+.contact__map {
+  border-radius: var(--radius); overflow: hidden; border: 1px solid var(--line-strong);
+  flex: 1 1 auto; min-height: 220px;     /* grows to match the form column's height */
+  box-shadow: 0 30px 60px -40px rgba(0,0,0,0.9);
+}
+.contact__map iframe { width: 100%; height: 100%; border: 0; filter: grayscale(0.4) contrast(1.05) brightness(0.85); }
+
+/* the form is just a styled column now (shares .contact__col) */
+.field { display: flex; flex-direction: column; gap: 0.5rem; }
+.field--grow { flex: 1 1 auto; }
+.field--grow textarea { flex: 1 1 auto; min-height: 120px; }
+.field__label { font-size: 0.75rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--cream-mute); }
+.field input, .field textarea {
+  background: rgba(10,8,6,0.6); border: 1px solid var(--line-strong);
+  border-radius: 14px; padding: 0.85rem 1rem; color: var(--cream);
+  font-size: var(--step-0); resize: vertical;
+  transition: border-color 0.3s var(--ease-out), box-shadow 0.3s var(--ease-out);
+}
+.field input::placeholder, .field textarea::placeholder { color: var(--cream-faint); }
+.field input:focus, .field textarea:focus {
+  outline: none; border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(217,169,78,0.14);
+}
+.contact__form-note { font-size: var(--step--1); color: var(--gold-lit); min-height: 1.2em; }
+
+/* ============================ FOOTER ============================ */
+.footer {
+  border-top: 1px solid var(--line);
+  padding: clamp(2.5rem,6vh,4rem) var(--pad-x);
+  max-width: 100%;
+  display: flex; align-items: center; justify-content: space-between; gap: 1.5rem;
+  flex-wrap: wrap;
+}
+.footer__brand { display: flex; align-items: center; gap: 0.6rem; font-family: var(--font-display); font-size: 1.1rem; }
+.footer__brand img { width: 30px; height: 30px; filter: brightness(0) invert(1) opacity(0.85); }
+.footer__nav { display: flex; gap: 1.4rem; flex-wrap: wrap; }
+.footer__nav a { font-size: var(--step--1); color: var(--cream-mute); transition: color 0.3s; }
+.footer__nav a:hover { color: var(--gold); }
+.footer__legal { font-size: var(--step--1); color: var(--cream-faint); }
+
+/* ============================ WHATSAPP FLOAT ============================ */
+.wa {
+  position: fixed; right: clamp(1rem, 3vw, 2rem); bottom: clamp(1rem, 3vw, 2rem);
+  z-index: 80; display: flex; align-items: center; gap: 0.7rem;
+  opacity: 0; transform: translateY(20px) scale(0.85); pointer-events: none;
+  transition: opacity 0.5s var(--ease-out), transform 0.5s var(--ease-out);
+}
+.wa.is-visible { opacity: 1; transform: none; pointer-events: auto; }
+.wa__bubble {
+  max-width: 0; overflow: hidden; white-space: nowrap;
+  padding: 0; opacity: 0;
+  background: var(--cream); color: #1c140b;
+  border-radius: 100px; font-size: var(--step--1); font-weight: 500;
+  box-shadow: 0 14px 30px -14px rgba(0,0,0,0.6);
+  transition: max-width 0.6s var(--ease-out), padding 0.6s var(--ease-out), opacity 0.4s ease;
+}
+.wa.is-open .wa__bubble { max-width: 260px; padding: 0.7rem 1.1rem; opacity: 1; }
+.wa__btn {
+  width: 60px; height: 60px; border-radius: 50%; flex: none;
+  display: grid; place-items: center; color: var(--gold-lit);
+  /* gold glassmorphism: translucent gold film + backdrop blur + soft rim */
+  background: linear-gradient(135deg, rgba(217,169,78,0.30), rgba(217,169,78,0.10));
+  backdrop-filter: blur(14px) saturate(1.5);
+  -webkit-backdrop-filter: blur(14px) saturate(1.5);
+  border: 1px solid rgba(217,169,78,0.55);
+  box-shadow: 0 16px 34px -12px rgba(217,169,78,0.45), inset 0 1px 0 rgba(255,255,255,0.35);
+}
+.wa.is-bouncing .wa__btn { animation: waBounce 1.4s var(--ease-io) infinite; }
+@keyframes waBounce { 0%,100%{transform:translateY(0)} 30%{transform:translateY(-8px)} 50%{transform:translateY(0)} 65%{transform:translateY(-4px)} 80%{transform:translateY(0)} }
+@media (prefers-reduced-motion: reduce) { .wa.is-bouncing .wa__btn { animation: none; } }
