@@ -596,18 +596,20 @@
 .step__desc { color: var(--cream-mute); font-size: var(--step-0); font-weight: 300; line-height: 1.5; }
 @media (prefers-reduced-motion: reduce) { .step { opacity: 1; transform: none; } }
 
-.clients { max-width: var(--maxw); margin: clamp(4rem,9vh,7rem) auto 0; padding-inline: var(--pad-x); text-align: center; }
-.clients__label { font-size: var(--step--1); letter-spacing: 0.24em; text-transform: uppercase; color: var(--cream-mute); margin-bottom: 1.8rem; }
-.clients__row {
-  display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
-  gap: clamp(1.6rem, 5vw, 4rem);
+/* Closing statement where the client logos used to be */
+.process__closer {
+  max-width: 900px;
+  margin: clamp(4rem,9vh,7rem) auto 0;
+  padding: clamp(2.4rem,5vw,3.4rem) var(--pad-x) 0;
+  border-top: 1px solid var(--line);
+  text-align: center;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--step-2);
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+  color: var(--cream);
 }
-.clients__logo {
-  font-family: var(--font-display); font-size: clamp(1.2rem, 2.6vw, 1.8rem);
-  letter-spacing: 0.04em; color: var(--cream-faint);
-  transition: color 0.4s var(--ease-out); cursor: default;
-}
-.clients__logo:hover { color: var(--gold); }
 
 /* ============================ CONTACT ============================ */
 .contact { position: relative; overflow: hidden; padding: clamp(5rem,12vh,9rem) 0; }
