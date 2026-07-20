@@ -466,7 +466,7 @@
      playing while the solution fuses into the "Nuestros servicios" title and
      the ZV / background fade to black. No separate curtain. */
   margin-top: -80vh;
-  padding: 0 0 clamp(5rem, 12vh, 10rem);
+  padding: 0 0 clamp(1.5rem, 3vh, 3rem);   /* trimmed: less black before the process */
 }
 
 /* --- fitted video layer: pinned to the viewport, videos anchored to edges.
@@ -523,6 +523,9 @@
   margin-bottom: 60vh;     /* big gap so each video gets a full scroll to scrub */
   max-width: 45%;
 }
+/* the last block needs less trailing room (no more video to scrub after it),
+   so we cut its gap to remove the dead black space before "La fórmula del éxito" */
+.svc:last-child { margin-bottom: 30vh; }
 .svc--right { margin-left: auto;  text-align: left; padding-right: 8vw; }  /* text right, video 01/03 left */
 .svc--left  { margin-right: auto; text-align: left; padding-left: 8vw;  }  /* text left,  video 02/04 right */
 .svc__index {
@@ -568,7 +571,7 @@
 .vcard__text { color: var(--cream-soft); font-size: var(--step-0); line-height: 1.55; font-weight: 300; }
 
 /* ============================ PROCESS ============================ */
-.process { padding: clamp(5rem, 12vh, 9rem) 0; background: var(--noir-2); }
+.process { padding: clamp(3rem, 6vh, 5rem) 0 clamp(5rem, 12vh, 9rem); background: var(--noir-2); }
 .process__head { max-width: var(--maxw); margin: 0 auto clamp(3rem,7vh,5rem); padding-inline: var(--pad-x); max-width: 720px; text-align: center; }
 .process__heading { font-size: var(--step-4); margin: 0 0 1.2rem; }
 .process__lead { color: var(--cream-soft); font-weight: 300; font-size: var(--step-1); }
@@ -596,19 +599,28 @@
 .step__desc { color: var(--cream-mute); font-size: var(--step-0); font-weight: 300; line-height: 1.5; }
 @media (prefers-reduced-motion: reduce) { .step { opacity: 1; transform: none; } }
 
-/* Closing statement where the client logos used to be */
+/* Closing statement where the client logos used to be — a centred phrase that
+   "writes itself" left→right as it scrolls into view (same mask language as the
+   solution title). --closer-wipe is driven 0→1 by process.js. */
 .process__closer {
-  max-width: 900px;
-  margin: clamp(4rem,9vh,7rem) auto 0;
-  padding: clamp(2.4rem,5vw,3.4rem) var(--pad-x) 0;
-  border-top: 1px solid var(--line);
+  max-width: 780px;             /* tight measure → wraps to a few punchy lines    */
+  margin: clamp(4rem, 10vh, 7.5rem) auto 0;
+  padding-inline: var(--pad-x);
   text-align: center;
   font-family: var(--font-display);
   font-weight: 400;
-  font-size: var(--step-2);
-  line-height: 1.35;
-  letter-spacing: -0.01em;
+  font-size: clamp(1.9rem, 1.1rem + 2.6vw, 3.4rem);
+  line-height: 1.25;
+  letter-spacing: -0.015em;
   color: var(--cream);
+  text-shadow: 0 10px 40px rgba(0,0,0,0.6);
+  -webkit-mask: linear-gradient(90deg, #000 calc(var(--closer-wipe, 1) * 130% - 30%),
+                rgba(0,0,0,0) calc(var(--closer-wipe, 1) * 130%));
+  mask: linear-gradient(90deg, #000 calc(var(--closer-wipe, 1) * 130% - 30%),
+                rgba(0,0,0,0) calc(var(--closer-wipe, 1) * 130%));
+}
+@media (prefers-reduced-motion: reduce) {
+  .process__closer { -webkit-mask: none; mask: none; }
 }
 
 /* ============================ CONTACT ============================ */
