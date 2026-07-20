@@ -134,19 +134,25 @@
     gap: 0; max-width: 520px;
   }
   .step {
-    border-top: none;
     padding: 1.5rem 0 1.5rem 4.5rem;
     margin-left: 1.4rem;                 /* ALL steps share the same left inset */
   }
-  /* the connecting rail only runs between nodes, so the LAST step drops it —
-     but it keeps the same margin + number offset so it stays aligned (centred) */
-  .step:not(:last-child) { border-left: 1px solid var(--line-strong); }
+  /* the horizontal "schema" line is desktop-only; the vertical timeline uses a
+     rail drawn top→bottom instead (the ::before, so it can animate). */
+  .step::before {
+    top: 1.2rem; bottom: -0.1rem; left: 0; right: auto;
+    width: 1px; height: auto;
+    transform: scaleY(0); transform-origin: top center;
+  }
+  .step:last-child::before { display: none; }             /* rail runs between nodes only */
+  .steps.is-in .step::before { transform: scaleY(1); }
   .step__num {
     position: absolute; left: 1.4rem; top: 1.2rem;
     margin: 0; font-size: 2.4rem;
-    transform: translateX(-50%);
     background: var(--noir-2); padding: 0 0.2rem;
+    transform: translate(-50%, -20px);                    /* start: on the rail, lifted */
   }
+  .steps.is-in .step__num { transform: translateX(-50%); } /* land: centred on the rail */
 
   /* ---- Contact: columns stack ---- */
   .contact__cols { grid-template-columns: 1fr; }

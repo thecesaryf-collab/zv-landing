@@ -571,7 +571,13 @@
 .vcard__text { color: var(--cream-soft); font-size: var(--step-0); line-height: 1.55; font-weight: 300; }
 
 /* ============================ PROCESS ============================ */
-.process { padding: clamp(3rem, 6vh, 5rem) 0 clamp(5rem, 12vh, 9rem); background: var(--noir-2); }
+/* position + z-index above the services' fixed video overlay so, now that the
+   section is tighter, the (opaque) process paints OVER any video still on screen */
+.process {
+  position: relative; z-index: 6;
+  padding: clamp(3rem, 6vh, 5rem) 0 clamp(5rem, 12vh, 9rem);
+  background: var(--noir-2);
+}
 .process__head { max-width: var(--maxw); margin: 0 auto clamp(3rem,7vh,5rem); padding-inline: var(--pad-x); max-width: 720px; text-align: center; }
 .process__heading { font-size: var(--step-4); margin: 0 0 1.2rem; }
 .process__lead { color: var(--cream-soft); font-weight: 300; font-size: var(--step-1); }
@@ -580,38 +586,64 @@
   max-width: var(--maxw); margin-inline: auto; padding-inline: var(--pad-x);
   display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.4rem;
 }
+/* Staged reveal (driven by .steps.is-in, set by process.js when the grid enters
+   view): (1) the thin lines DRAW across the top like a schema branching out,
+   (2) the numbers DROP in one-two-three-four in cascade, (3) each title + desc
+   rises in just behind its number. --si (0..3) is the per-step index. */
 .step {
   position: relative; padding: 2rem 1.6rem;
-  border-top: 1px solid var(--line-strong);
-  opacity: 0; transform: translateY(30px);
-  transition: opacity 0.8s var(--ease-out), transform 0.8s var(--ease-out);
+  border-top: none;                 /* the rule is now the animated ::before line */
 }
-.step.is-in { opacity: 1; transform: none; }
+/* the schema line, drawn left→right along the top of each column */
+.step::before {
+  content: ""; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: var(--line-strong);
+  transform: scaleX(0); transform-origin: left center;
+  transition: transform 0.7s var(--ease-out);
+  transition-delay: calc(0.1s + var(--si, 0) * 0.13s);
+}
+.steps.is-in .step::before { transform: scaleX(1); }
+
 .step__num {
   font-family: var(--font-display); font-size: clamp(3rem, 6vw, 5rem);
   line-height: 1; color: transparent;
   -webkit-text-stroke: 1px var(--gold);
   display: block; margin-bottom: 1rem;
-  transition: color 0.5s var(--ease-out);
+  opacity: 0; transform: translateY(-26px);
+  transition: color 0.5s var(--ease-out), opacity 0.5s var(--ease-out),
+              transform 0.7s cubic-bezier(0.34, 1.5, 0.64, 1);   /* drop with a soft bounce */
+  transition-delay: calc(0.5s + var(--si, 0) * 0.16s);
 }
+.steps.is-in .step__num { opacity: 1; transform: none; }
 .step:hover .step__num { color: var(--gold); }
+
+.step__body {
+  opacity: 0; transform: translateY(16px);
+  transition: opacity 0.7s var(--ease-out), transform 0.7s var(--ease-out);
+  transition-delay: calc(0.72s + var(--si, 0) * 0.16s);
+}
+.steps.is-in .step__body { opacity: 1; transform: none; }
+
 .step__title { font-size: var(--step-1); margin-bottom: 0.7rem; }
 .step__desc { color: var(--cream-mute); font-size: var(--step-0); font-weight: 300; line-height: 1.5; }
-@media (prefers-reduced-motion: reduce) { .step { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .step::before { transform: scaleX(1); transition: none; }
+  .step__num, .step__body { opacity: 1; transform: none; transition: none; }
+}
 
 /* Closing statement where the client logos used to be — a centred phrase that
    "writes itself" left→right as it scrolls into view (same mask language as the
    solution title). --closer-wipe is driven 0→1 by process.js. */
 .process__closer {
-  max-width: 780px;             /* tight measure → wraps to a few punchy lines    */
-  margin: clamp(4rem, 10vh, 7.5rem) auto 0;
-  padding-inline: var(--pad-x);
+  max-width: 820px;             /* ~2 lines on desktop (more on phones) */
+  margin: clamp(3.5rem, 8vh, 6rem) auto 0;
+  padding-inline: 1.25rem;      /* small gutter only — the big --pad-x forced 3 lines */
   text-align: center;
   font-family: var(--font-display);
   font-weight: 400;
-  font-size: clamp(1.9rem, 1.1rem + 2.6vw, 3.4rem);
-  line-height: 1.25;
-  letter-spacing: -0.015em;
+  font-size: clamp(1.15rem, 0.85rem + 1.15vw, 1.7rem);
+  line-height: 1.4;
+  letter-spacing: -0.01em;
   color: var(--cream);
   text-shadow: 0 10px 40px rgba(0,0,0,0.6);
   -webkit-mask: linear-gradient(90deg, #000 calc(var(--closer-wipe, 1) * 130% - 30%),

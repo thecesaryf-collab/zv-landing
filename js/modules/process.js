@@ -3,7 +3,9 @@
 import { onFrame, mapClamp, prefersReducedMotion } from '../lib/util.js';
 
 export function initProcess() {
+  const stepsWrap = document.querySelector('.steps');
   const steps = [...document.querySelectorAll('[data-step]')];
+  steps.forEach((s, i) => s.style.setProperty('--si', i));   // per-step cascade index
 
   // --- closing statement: scroll-driven left→right wipe (same as the solution
   //     title). It starts writing as it enters the lower viewport and finishes
@@ -19,19 +21,19 @@ export function initProcess() {
     });
   }
 
-  if (!steps.length) return;
+  // --- steps: reveal the whole grid once, then CSS cascades lines → numbers →
+  //     bodies via each step's --si and staggered transition-delays. ---
+  if (!stepsWrap) return;
   if (prefersReducedMotion || !('IntersectionObserver' in window)) {
-    steps.forEach(s => s.classList.add('is-in'));
+    stepsWrap.classList.add('is-in');
     return;
   }
   const io = new IntersectionObserver((entries) => {
     entries.forEach(e => {
       if (!e.isIntersecting) return;
-      const i = steps.indexOf(e.target);
-      e.target.style.transitionDelay = `${(i % 4) * 90}ms`;
-      e.target.classList.add('is-in');
-      io.unobserve(e.target);
+      stepsWrap.classList.add('is-in');
+      io.disconnect();
     });
-  }, { threshold: 0.35, rootMargin: '0px 0px -10% 0px' });
-  steps.forEach(s => io.observe(s));
+  }, { threshold: 0.25, rootMargin: '0px 0px -12% 0px' });
+  io.observe(stepsWrap);
 }
