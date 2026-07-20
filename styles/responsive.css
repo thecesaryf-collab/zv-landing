@@ -146,13 +146,21 @@
   }
   .step:last-child::before { display: none; }             /* rail runs between nodes only */
   .steps.is-in .step::before { transform: scaleY(1); }
+  /* Oversized numbers (~2.5×) that stay ANCHORED in the gutter between the rail
+     and the text. They're absolutely positioned, so growing them pushes nothing.
+     A hard right-side clip (clip-path) keeps them a few px from the text: a wide
+     glyph (like 3) simply gets a clean vertical cut instead of colliding with or
+     shoving the copy. Narrow ones (like 1) fit fully and aren't cut. */
+  .step { padding-left: 5rem; }               /* a touch more room for the big number */
   .step__num {
-    position: absolute; left: 1.4rem; top: 1.2rem;
-    margin: 0; font-size: 2.4rem;
-    background: var(--noir-2); padding: 0 0.2rem;
-    transform: translate(-50%, -20px);                    /* start: on the rail, lifted */
+    position: absolute; left: 0.3rem; top: 0.35rem;
+    margin: 0; padding: 0; background: none;
+    font-size: 6rem; line-height: 1;          /* ~2.5× the old 2.4rem */
+    width: 4.3rem;                            /* right edge ≈ 0.4rem before the text → the cut line */
+    clip-path: inset(-2rem 0 -2rem 0);        /* clip ONLY the right (and left) edge; top/bottom free */
   }
-  .steps.is-in .step__num { transform: translateX(-50%); } /* land: centred on the rail */
+  /* the drop-in cascade uses the desktop base transform (translateY → none), so
+     no centering override here — the number keeps its fixed left anchor. */
 
   /* ---- Contact: columns stack ---- */
   .contact__cols { grid-template-columns: 1fr; }
