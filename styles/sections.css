@@ -19,11 +19,11 @@
   gap: 1rem;
   padding: 0.7rem 0.7rem 0.7rem 1.15rem;
   border-radius: 100px;
-  /* Fuses with background until scrolled — barely-there edges */
-  background: rgba(20, 15, 10, calc(0.04 + 0.55 * var(--nav-solid)));
-  border: 1px solid rgba(233, 205, 155, calc(0.04 + 0.14 * var(--nav-solid)));
-  backdrop-filter: blur(calc(2px + 14px * var(--nav-solid))) saturate(1.2);
-  -webkit-backdrop-filter: blur(calc(2px + 14px * var(--nav-solid))) saturate(1.2);
+  /* Solidifies on scroll via --nav-solid. NO backdrop-filter: a fixed bar that
+     blurs everything scrolling behind it recomputes that blur every frame — pure
+     jank on mobile. A slightly-opaque background reads clean over the dark page. */
+  background: rgba(16, 12, 8, calc(0.32 + 0.55 * var(--nav-solid)));
+  border: 1px solid rgba(233, 205, 155, calc(0.05 + 0.16 * var(--nav-solid)));
   box-shadow: 0 18px 40px -24px rgba(0, 0, 0, calc(0.2 + 0.6 * var(--nav-solid)));
   transition: padding 0.5s var(--ease-out);
 }
@@ -115,9 +115,10 @@
   width: 100vw; height: 92vh;
   background: radial-gradient(50% 50% at 50% 50%,
               rgba(217,169,78,0.34), rgba(198,122,46,0.14) 38%, transparent 70%);
-  filter: blur(52px);
+  /* no blur filter: the radial gradient is already soft, and a 52px blur on a
+     full-viewport layer is expensive to raster/composite on weak GPUs */
   opacity: calc(0.12 + 0.88 * var(--warm, 0));
-  will-change: opacity;   /* opacity-only change → composited, not a blur repaint */
+  will-change: opacity;
 }
 .act__bg::after {    /* overall warm lift from black */
   content: ""; position: absolute; inset: 0;
@@ -135,7 +136,6 @@
     radial-gradient(40% 50% at 100% 100%, rgba(217,169,78,0.30), transparent 62%),
     radial-gradient(34% 42% at 100% 0%,   rgba(198,122,46,0.21), transparent 60%),
     radial-gradient(32% 40% at 0% 0%,     rgba(150,86,30,0.19),  transparent 60%);
-  filter: blur(6px);
   opacity: calc((0.28 + 0.72 * var(--warm, 0)) * (1 - var(--dim, 0)));
   will-change: opacity;
 }
@@ -150,7 +150,6 @@
     radial-gradient(46% 40% at 50% 27%, rgba(217,169,78,0.18), transparent 62%),
     radial-gradient(38% 34% at 17% 33%, rgba(198,122,46,0.14), transparent 60%),
     radial-gradient(40% 34% at 84% 30%, rgba(217,169,78,0.12), transparent 60%);
-  filter: blur(34px);
   opacity: calc((0.28 + 0.72 * var(--warm, 0)) * (1 - var(--dim, 0)));
   transform: translateY(calc(var(--aura-y, 0) * 1px));
   will-change: transform, opacity;
@@ -163,8 +162,9 @@
   padding: 0 7vw;
   transform: translateY(calc(var(--text-y, 82) * 1vh));
   opacity: var(--paint-op, 1);
-  filter: blur(calc(var(--paint-bl, 0) * 1px));
-  will-change: transform, opacity, filter;
+  /* no animated blur: changing the blur radius per frame re-rasterises the text
+     every frame during its fade-out. The opacity fade alone reads clean. */
+  will-change: transform, opacity;
 }
 .act__paintext span {
   font-family: var(--font-display); font-weight: 400;
@@ -320,21 +320,21 @@
 /* only the layers whose OPACITY animates per frame get their own compositor
    layer, so their changes are GPU-composited (no repaint). extrude + face are
    static and paint into the base layer — fewer layers, no wasted memory. */
-.mono__shadow, .mono__rim--cool, .mono__rim--warm, .mono__glow, .mono__sheen {
+.mono__rim--cool, .mono__rim--warm, .mono__glow, .mono__sheen {
   will-change: opacity;
 }
 /* soft contact shadow cast down-behind the object */
 .mono__shadow {
-  background: #000;
-  transform: translateY(2.6%) scale(0.995);
-  filter: blur(30px);
-  opacity: calc(0.4 + 0.35 * var(--ignite));
+  /* soft radial grounding shadow (no ZV mask, no blur filter → static texture,
+     never re-rasterises when the logo scales) */
+  -webkit-mask: none; mask: none;
+  background: radial-gradient(58% 48% at 50% 90%, rgba(0,0,0,0.72), transparent 72%);
+  opacity: 0.6;
 }
 /* extruded thickness — a dark copy pushed down-right */
 .mono__extrude {
   background: linear-gradient(155deg, #100c08, #050403 70%);
   transform: translate(6px, 9px);
-  filter: blur(0.5px);
 }
 /* cool counter-rim (teal), like the reference edge light */
 .mono__rim--cool {
@@ -342,7 +342,6 @@
               rgba(96,158,172,0.5) 76%, rgba(168,232,242,0.9) 100%);
   transform: translate(4px, 5px);
   opacity: calc(0.28 + 0.4 * var(--ignite));
-  mix-blend-mode: screen;
 }
 /* warm key-rim (gold), top-left */
 .mono__rim--warm {
@@ -356,14 +355,14 @@
   background: linear-gradient(158deg, #33271b 0%, #1a130d 34%,
               #0b0805 60%, #070504 78%, #1e150c 100%);
 }
-/* molten-gold ignite flood */
+/* molten-gold ignite flood. No mix-blend-mode (blend modes force off-screen
+   compositing + backdrop readback every frame — very heavy on mobile GPUs).
+   Opacity is kept lower so the dark face modelling still shows through the alpha,
+   keeping the object dimensional instead of flat gold. */
 .mono__glow {
   background: linear-gradient(150deg, var(--gold-lit) 0%, var(--gold) 30%,
               var(--gold-deep) 56%, #3a2710 86%);
-  /* capped below 1 so the dark face modelling still reads through when
-     fully lit — keeps the object dimensional instead of flat gold */
-  opacity: calc(var(--ignite) * 0.82);
-  mix-blend-mode: screen;
+  opacity: calc(var(--ignite) * 0.72);
 }
 /* travelling specular streak. The streak lives in a child <i> that moves via
    TRANSFORM (compositor-only, no repaint) while the parent's ZV mask clips it to
@@ -371,12 +370,11 @@
    whole big masked layer on every frame, forever. */
 .mono__sheen {
   opacity: calc(0.12 + 0.85 * var(--ignite));
-  mix-blend-mode: screen;
-  overflow: hidden;
+  overflow: hidden;   /* no mix-blend-mode: too costly on mobile; a translucent white streak reads the same */
 }
 .mono__sheen > i {
   position: absolute; top: 0; bottom: 0; left: -55%; right: -55%;
-  background: linear-gradient(112deg, transparent 44%, rgba(255,247,224,0.95) 50%, transparent 56%);
+  background: linear-gradient(112deg, transparent 44%, rgba(255,247,224,0.6) 50%, transparent 56%);
   animation: sheen 7s var(--ease-io) infinite;
   will-change: transform;
 }
@@ -393,10 +391,12 @@
   display: flex; align-items: center; gap: 1rem;
   width: min(27rem, 78vw); padding: 1.1rem 1.6rem;
   border-radius: 999px;                 /* fully rounded */
-  background: rgba(32, 23, 14, 0.30);
+  /* Translucent panel that reads as glass over the dark ACT — WITHOUT
+     backdrop-filter. Five glass pills each blurring the (also-animating)
+     backdrop every frame was the single biggest source of scroll lag on
+     phones/weak GPUs. A layered translucent gradient fakes the same depth. */
+  background: linear-gradient(158deg, rgba(60, 44, 27, 0.66), rgba(24, 17, 10, 0.70));
   border: 1px solid var(--line-strong);
-  backdrop-filter: blur(20px) saturate(1.3);
-  -webkit-backdrop-filter: blur(20px) saturate(1.3);
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.10), 0 34px 60px -34px rgba(0,0,0,0.95);
   font-size: var(--step-0); font-weight: 400; color: var(--cream);
   /* centred column with a small alternating left/right deviation (--dx), plus a
@@ -405,11 +405,10 @@
   transform: translate(calc(-50% + var(--dx, 0)), calc(var(--py, 60) * 1vh))
              scale(var(--pain-scale, 1));
   opacity: var(--op, 0);
-  filter: blur(calc(var(--bl, 0) * 1px));
   pointer-events: auto;                  /* so the chips react to the cursor */
   transition: --pain-scale 0.4s var(--ease-out), border-color 0.4s var(--ease-out),
               background 0.4s var(--ease-out), box-shadow 0.4s var(--ease-out);
-  will-change: transform, opacity, filter;
+  will-change: transform, opacity;
 }
 @media (hover: hover) {
   .pain:hover {
@@ -537,9 +536,10 @@
 .services__mask {
   position: absolute; top: -13vh; left: 50%; transform: translateX(-50%);
   width: 150vw; height: 36vh; z-index: -1; pointer-events: none;
+  /* solid gradient only — a backdrop-filter here re-blurs the service text
+     scrolling behind it on every frame. The opaque gradient hides it just as well. */
   background: linear-gradient(to bottom,
-              rgba(10,8,6,0.94) 0%, rgba(10,8,6,0.72) 42%, transparent 100%);
-  backdrop-filter: blur(9px); -webkit-backdrop-filter: blur(9px);
+              rgba(10,8,6,0.97) 0%, rgba(10,8,6,0.86) 46%, transparent 100%);
   -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 52%, transparent 100%);
   mask-image: linear-gradient(to bottom, #000 0%, #000 52%, transparent 100%);
 }
@@ -722,10 +722,11 @@
 }
 .contact__col {
   display: flex; flex-direction: column; gap: 1.1rem;
-  background: linear-gradient(165deg, rgba(33,24,18,0.7), rgba(16,11,8,0.7));
+  /* opaque gradient instead of a translucent card + backdrop-filter (which
+     re-blurs the page behind these large cards as they scroll past) */
+  background: linear-gradient(165deg, rgba(37,27,19,0.96), rgba(15,10,7,0.97));
   border: 1px solid var(--line); border-radius: var(--radius-lg);
   padding: clamp(1.6rem, 3vw, 2.6rem);
-  backdrop-filter: blur(16px);
   box-shadow: 0 40px 80px -50px rgba(0,0,0,0.95), inset 0 1px 0 rgba(255,255,255,0.05);
 }
 .contact__col-eyebrow { font-family: var(--font-display); font-size: var(--step-2); line-height: 1.1; }
@@ -795,10 +796,10 @@
 .wa__btn {
   width: 60px; height: 60px; border-radius: 50%; flex: none;
   display: grid; place-items: center; color: var(--gold-lit);
-  /* gold glassmorphism: translucent gold film + backdrop blur + soft rim */
-  background: linear-gradient(135deg, rgba(217,169,78,0.30), rgba(217,169,78,0.10));
-  backdrop-filter: blur(14px) saturate(1.5);
-  -webkit-backdrop-filter: blur(14px) saturate(1.5);
+  /* gold film + rim. No backdrop-filter: this button is FIXED and visible for the
+     whole page, so a backdrop blur would re-blur everything scrolling behind it on
+     every frame. A slightly more opaque gold gradient keeps the look. */
+  background: linear-gradient(135deg, rgba(88,60,24,0.92), rgba(52,36,16,0.92));
   border: 1px solid rgba(217,169,78,0.55);
   box-shadow: 0 16px 34px -12px rgba(217,169,78,0.45), inset 0 1px 0 rgba(255,255,255,0.35);
 }
