@@ -664,6 +664,16 @@
     radial-gradient(55% 45% at 85% 80%, rgba(217,169,78,0.20), transparent 60%);
   will-change: transform;
 }
+/* black→glow blend at the top edge: starts as solid noir (matching the process
+   section above, so no hard horizontal cut) and fades out to reveal the warm
+   radial lights. Sits above the parallax, below the content. No layout impact. */
+.contact__fade {
+  position: absolute; top: 0; left: 0; right: 0;
+  height: clamp(130px, 24vh, 300px);
+  z-index: 0; pointer-events: none;
+  background: linear-gradient(to bottom,
+              var(--noir-2) 0%, rgba(14, 11, 8, 0.65) 42%, transparent 100%);
+}
 .contact__inner {
   position: relative; z-index: 1;
   max-width: var(--maxw); margin-inline: auto; padding-inline: var(--pad-x);

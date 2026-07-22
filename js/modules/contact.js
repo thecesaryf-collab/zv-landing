@@ -2,6 +2,8 @@
    form handler that validates and gives clear, in-voice feedback. */
 import { onFrame, lerp, prefersReducedMotion } from '../lib/util.js';
 
+const WA_PHONE = '34618313932';   // +34 618 31 39 32 — form requests land here
+
 export function initContact() {
   const section = document.querySelector('[data-contact]');
   const bg = document.querySelector('[data-contact-parallax]');
@@ -40,13 +42,20 @@ export function initContact() {
             : 'Cuéntanos algo sobre tu proyecto y te respondemos.';
         return;
       }
-      // No backend wired: acknowledge and hand off to email as a fallback.
+      // No backend wired: hand the request off to WhatsApp so it reaches us.
+      // On a phone the whatsapp:// scheme opens the app directly; on desktop
+      // wa.me opens WhatsApp Web / the desktop app.
       note.style.color = 'var(--gold-lit)';
-      note.textContent = `Gracias, ${name.split(' ')[0]}. Abrimos tu correo para enviar la consulta…`;
-      const subject = encodeURIComponent('Consulta desde la web — ' + name);
-      const body = encodeURIComponent(`${message}\n\n— ${name} (${email})`);
+      note.textContent = `Gracias, ${name.split(' ')[0]}. Abrimos WhatsApp para enviar tu consulta…`;
+      const text = encodeURIComponent(`Hola, soy ${name} (${email}).\n\n${message}`);
+      const isMobile = window.matchMedia('(max-width: 760px)').matches
+        || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
       setTimeout(() => {
-        window.location.href = `mailto:info@zvconsulting.com?subject=${subject}&body=${body}`;
+        if (isMobile) {
+          window.location.href = `whatsapp://send?phone=${WA_PHONE}&text=${text}`;
+        } else {
+          window.open(`https://wa.me/${WA_PHONE}?text=${text}`, '_blank', 'noopener');
+        }
       }, 600);
       form.reset();
     });
