@@ -54,10 +54,9 @@
      climbs ~a third of the screen. Push its travel further so it reaches the
      middle of the viewport like it does on desktop. */
   /* PERFORMANCE on phones (weak GPUs are FILL-RATE bound = steady low FPS): the
-     monogram + halo are enormous and every masked layer is a lot of pixels/frame.
-     We (a) shrink both — with the translate %s recomputed so the on-screen
-     position/travel is IDENTICAL — and (b) mask ONCE on the container instead of
-     per layer (4 mask ops → 1). Core look (gold ZV lighting up + warm glow) holds. */
+     monogram + halo are enormous, and every composited layer stacked on top is
+     more pixels the GPU has to blend each frame. We shrink both — with the
+     translate %s recomputed so the on-screen position/travel is IDENTICAL. */
   .act__mono {
     width: 128vw;   /* was 150vw; %s below keep the exact peek (66vw) + rise (-57vw) */
     transform: translate(-50%, calc(52% - var(--mono-rise, 0) * 96%))
@@ -68,17 +67,30 @@
     transform: translate(-50%, calc(44% - var(--mono-rise, 0) * 82%))
                scale(calc(1 - 0.4 * var(--mono-rise, 0)));
   }
-  /* one mask on the group instead of one per layer */
+  /* Mask ONCE on the group for the layers that sit FLUSH with the container
+     (face / glow / sheen) — for those, one shared mask looks identical to
+     masking each individually, since they aren't offset from the box.
+     .mono__extrude and .mono__rim--* are duplicate copies nudged a few px
+     off-centre to fake extruded thickness + edge light (the "3D" trick), and
+     THAT only reads correctly if the offset copy carries its OWN mask, so the
+     mask travels WITH the offset and a sliver peeks out past the front face.
+     Sharing the group mask instead (as before) clipped them back to the
+     UN-offset window and erased that sliver — which is what flattened the
+     look. So: 1 shared mask + 3 individual masks, still well under the
+     original 6 since face/glow/sheen ride the shared one for free. */
   .mono {
     -webkit-mask: url("../ZV_logo.png") center / contain no-repeat;
             mask: url("../ZV_logo.png") center / contain no-repeat;
   }
   .mono > span { -webkit-mask: none; mask: none; }
-  .mono__shadow { display: none; }      /* unmasked radial; would be clipped to the ZV now */
-  .mono__sheen { display: none; }       /* continuously-animating specular layer */
-  .mono__rim--cool { display: none; }   /* subtle teal counter-rim */
-  .act__aura { display: none; }         /* full-viewport upper-glow layer */
-  .act__bg::after { display: none; }    /* full-viewport warm-lift layer */
+  .mono__extrude,
+  .mono__rim--cool,
+  .mono__rim--warm {
+    -webkit-mask: url("../ZV_logo.png") center / contain no-repeat;
+            mask: url("../ZV_logo.png") center / contain no-repeat;
+  }
+  .act__aura { display: none; }         /* full-viewport ambient layer — not part of the ZV itself */
+  .act__bg::after { display: none; }    /* full-viewport warm-lift layer — not part of the ZV itself */
   /* pills keep flowing, but centred full-width (no left/right scatter) */
   .act__pains .pain,
   .act__pains .pain:nth-child(1),
