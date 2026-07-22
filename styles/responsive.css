@@ -105,11 +105,9 @@
     left: auto; right: auto; top: auto; bottom: auto;
     border-radius: 0; -webkit-mask: none; mask: none; z-index: 1;
   }
-  /* per-video top/bottom margins (prototype values) */
-  [data-svc-vid="0"].is-inline { margin-top: 10px; margin-bottom: 20px; }
-  [data-svc-vid="1"].is-inline { margin-top: 30px; margin-bottom: 15px; }
-  [data-svc-vid="2"].is-inline { margin-top: 0;    margin-bottom: 40px; }
-  [data-svc-vid="3"].is-inline { margin-top: 20px; margin-bottom: 20px; }
+  /* video now sits BELOW its text: small gap above (keeps text+video together),
+     larger gap below (separates from the next block's text) */
+  .svc-vid.is-inline { margin-top: 18px; margin-bottom: 44px; }
   .svc__index { font-size: var(--step-1); position: relative; z-index: 20; }
   .svc__title { font-size: 3rem; position: relative; z-index: 20; }
   .svc__desc { font-size: 1.15rem; position: relative; z-index: 20; }

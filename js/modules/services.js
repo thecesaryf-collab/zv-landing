@@ -22,14 +22,11 @@ const CONFIG_DESKTOP = [
   { start: 0.50, end: 0.70 },   // 03 · Creamos presencia
   { start: 0.70, end: 0.95 },   // 04 · Digitalizamos procesos
 ];
-// p per block: 0 = block entering from the bottom, 0.5 = centred, 1 = exited top.
-// Earlier windows so each video STARTS scrubbing right as its block enters and
-// FINISHES around centre (then it just rides out on its last frame) — mobile only.
 const CONFIG_MOBILE = [
-  { start: 0.08, end: 0.52 },
-  { start: 0.06, end: 0.50 },
-  { start: 0.08, end: 0.52 },
-  { start: 0.08, end: 0.52 },
+  { start: 0.30, end: 0.90 },
+  { start: 0.25, end: 0.90 },
+  { start: 0.30, end: 0.90 },
+  { start: 0.30, end: 0.90 },
 ];
 
 export function initServices() {
@@ -87,7 +84,8 @@ export function initServices() {
       mode = 'mobile';
       vids.forEach((v, i) => {
         setSrc(v);
-        (blocks[i] || section).prepend(v);
+        // append (not prepend) so each block reads TEXT first, then its video
+        (blocks[i] || section).append(v);
         v.classList.add('is-inline');
         v.style.display = 'block';
       });
