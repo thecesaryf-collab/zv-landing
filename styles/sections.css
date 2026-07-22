@@ -101,7 +101,11 @@
    ================================================================================ */
 .act { position: relative; height: 480vh; background: #000; }  /* resolves to PURE black */
 .act__sticky {
-  position: sticky; top: 0; height: 100svh;
+  position: sticky; top: 0;
+  /* dvh, not svh: svh is the SMALL viewport, so when the mobile browser bar
+     hides and the viewport grows, an svh sticky was shorter than the screen and
+     the section's black showed underneath. dvh always matches the live viewport. */
+  height: 100vh; height: 100dvh;
   overflow: hidden; isolation: isolate;
 }
 

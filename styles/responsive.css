@@ -58,6 +58,14 @@
     transform: translate(-50%, calc(44% - var(--mono-rise, 0) * 82%))
                scale(calc(1 - 0.4 * var(--mono-rise, 0)));
   }
+  /* PERFORMANCE on phones (weak GPUs are fill-rate bound): drop the layers that
+     cost the most per composited frame but read as subtle detail — the huge
+     monogram is 150vw, so every extra full-size masked/animated layer over it is
+     a lot of pixels. The core look (gold ZV lighting up + warm glow) is intact. */
+  .mono__sheen { display: none; }       /* continuously-animating specular layer */
+  .mono__rim--cool { display: none; }   /* subtle teal counter-rim */
+  .act__aura { display: none; }         /* full-viewport upper-glow layer */
+  .act__bg::after { display: none; }    /* full-viewport warm-lift layer */
   /* pills keep flowing, but centred full-width (no left/right scatter) */
   .act__pains .pain,
   .act__pains .pain:nth-child(1),

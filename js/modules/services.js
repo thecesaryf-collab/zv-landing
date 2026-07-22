@@ -118,8 +118,11 @@ export function initServices() {
   onFrame(() => {
     const vh = window.innerHeight;
 
-    // fade the pinned title out as the section leaves (hands over to Opiniones)
+    // Skip all work while the section is still below the fold (during the hero /
+    // ACT scroll). Reading rects + scrubbing every frame there forced layouts that
+    // piled onto the ACT's own per-frame cost.
     const sr = section.getBoundingClientRect();
+    if (sr.top > vh) return;
     root.style.setProperty('--svc-title-out', mapClamp(sr.bottom, vh * 0.2, vh * 0.6).toFixed(3));
 
     if (mode === 'mobile') {

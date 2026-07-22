@@ -14,8 +14,9 @@ export function initContact() {
   if (bg && section && !prefersReducedMotion) {
     let y = 0;
     onFrame(() => {
-      const r = section.getBoundingClientRect();
       const vh = window.innerHeight;
+      const r = section.getBoundingClientRect();
+      if (r.top > vh || r.bottom < 0) return;   // off-screen: don't force a layout every frame
       // -1 … 1 as the section crosses the viewport
       const p = (r.top + r.height / 2 - vh / 2) / vh;
       y = lerp(y, p * -60, 0.1);
