@@ -10,9 +10,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..500&family=Hanken+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 
 <!-- ?v=… busts caches so CSS + JS always update together (a stale mix breaks reveals) -->
-<link rel="stylesheet" href="styles/base.css?v=8" />
-<link rel="stylesheet" href="styles/sections.css?v=8" />
-<link rel="stylesheet" href="styles/responsive.css?v=8" />
+<link rel="stylesheet" href="styles/base.css?v=9" />
+<link rel="stylesheet" href="styles/sections.css?v=9" />
+<link rel="stylesheet" href="styles/responsive.css?v=9" />
 
 <link rel="icon" href="ZV_logo.png" />
 
@@ -77,6 +77,9 @@
         <span>Tu negocio pierde dinero cada día por…</span>
       </div>
 
+      <!-- ignite halo (cheap radial glow) sits just behind the monogram -->
+      <div class="act__monoglow" aria-hidden="true"></div>
+
       <!-- the single 3D ZV monogram -->
       <div class="act__mono" data-mono aria-hidden="true">
         <div class="mono">
@@ -86,7 +89,7 @@
           <span class="mono__rim mono__rim--warm"></span>
           <span class="mono__face"></span>
           <span class="mono__glow"></span>
-          <span class="mono__sheen"></span>
+          <span class="mono__sheen"><i></i></span>
         </div>
       </div>
 
@@ -321,4 +324,4 @@
   </span>
 </a>
 
-<script type="module" src="js/main.js?v=8"></script>
+<script type="module" src="js/main.js?v=9"></script>

@@ -109,7 +109,7 @@
        --dim so the act resolves to the pure-black .act behind it --- */
 .act__bg { position: absolute; inset: 0; z-index: 0;
   background: radial-gradient(125% 90% at 50% 122%, #150e08 0%, #0a0806 48%);
-  opacity: calc(1 - var(--dim, 0)); }
+  opacity: calc(1 - var(--dim, 0)); will-change: opacity; }
 .act__bg::before {   /* warm pool behind the logo, grows with --warm */
   content: ""; position: absolute; left: 50%; bottom: -16%; transform: translateX(-50%);
   width: 100vw; height: 92vh;
@@ -117,6 +117,7 @@
               rgba(217,169,78,0.34), rgba(198,122,46,0.14) 38%, transparent 70%);
   filter: blur(52px);
   opacity: calc(0.12 + 0.88 * var(--warm, 0));
+  will-change: opacity;   /* opacity-only change → composited, not a blur repaint */
 }
 .act__bg::after {    /* overall warm lift from black */
   content: ""; position: absolute; inset: 0;
@@ -127,25 +128,30 @@
    very start (even with the ZV dark) and intensifying as --warm grows. */
 .act__corners {
   position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  /* fixed gradient alphas; the warm intensification is driven by OPACITY (a
+     compositor-only property) instead of recomputing the gradient every frame */
   background:
-    radial-gradient(38% 48% at 0% 100%,   rgba(198,122,46, calc(0.10 + 0.24 * var(--warm,0))), transparent 62%),
-    radial-gradient(40% 50% at 100% 100%, rgba(217,169,78, calc(0.08 + 0.22 * var(--warm,0))), transparent 62%),
-    radial-gradient(34% 42% at 100% 0%,   rgba(198,122,46, calc(0.05 + 0.16 * var(--warm,0))), transparent 60%),
-    radial-gradient(32% 40% at 0% 0%,     rgba(150,86,30,  calc(0.05 + 0.14 * var(--warm,0))), transparent 60%);
+    radial-gradient(38% 48% at 0% 100%,   rgba(198,122,46,0.34), transparent 62%),
+    radial-gradient(40% 50% at 100% 100%, rgba(217,169,78,0.30), transparent 62%),
+    radial-gradient(34% 42% at 100% 0%,   rgba(198,122,46,0.21), transparent 60%),
+    radial-gradient(32% 40% at 0% 0%,     rgba(150,86,30,0.19),  transparent 60%);
   filter: blur(6px);
-  opacity: calc(1 - var(--dim, 0));   /* edge warmth fades out with the ZV */
+  opacity: calc((0.28 + 0.72 * var(--warm, 0)) * (1 - var(--dim, 0)));
+  will-change: opacity;
 }
 /* faint warm glows in the UPPER field (incl. behind the hero title) — present
    from the very start, gently intensifying with --warm and drifting with scroll
    so the top of the hero isn't dead-dark. */
 .act__aura {
   position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  /* fixed gradient alphas; warm intensification via OPACITY (no per-frame repaint
+     of this big blurred full-viewport layer) */
   background:
-    radial-gradient(46% 40% at 50% 27%, rgba(217,169,78, calc(0.05 + 0.13 * var(--warm,0))), transparent 62%),
-    radial-gradient(38% 34% at 17% 33%, rgba(198,122,46, calc(0.04 + 0.10 * var(--warm,0))), transparent 60%),
-    radial-gradient(40% 34% at 84% 30%, rgba(217,169,78, calc(0.03 + 0.09 * var(--warm,0))), transparent 60%);
+    radial-gradient(46% 40% at 50% 27%, rgba(217,169,78,0.18), transparent 62%),
+    radial-gradient(38% 34% at 17% 33%, rgba(198,122,46,0.14), transparent 60%),
+    radial-gradient(40% 34% at 84% 30%, rgba(217,169,78,0.12), transparent 60%);
   filter: blur(34px);
-  opacity: calc(1 - var(--dim, 0));
+  opacity: calc((0.28 + 0.72 * var(--warm, 0)) * (1 - var(--dim, 0)));
   transform: translateY(calc(var(--aura-y, 0) * 1px));
   will-change: transform, opacity;
 }
@@ -179,9 +185,23 @@
   /* peek 44% → rise to -4% and shrink 40%, via --mono-rise */
   transform: translate(-50%, calc(44% - var(--mono-rise, 0) * 48%))
              scale(calc(1 - 0.4 * var(--mono-rise, 0)));
-  filter: drop-shadow(0 24px 55px rgba(0,0,0,0.6))
-          drop-shadow(0 0 calc(var(--ignite,0) * 95px) rgba(217,169,78, calc(var(--ignite,0) * 0.45)));
+  /* NO filter here: an animated drop-shadow blur re-rasterises this huge element
+     every frame (the main source of scroll lag on low-end devices). The contact
+     shadow lives in .mono__shadow; the ignite halo is .act__monoglow (a soft
+     radial, cheap to move/scale). This element is now a plain transformable layer. */
   opacity: var(--mono-op, 1);        /* the whole object fades out as it powers off */
+  pointer-events: none; will-change: transform, opacity;
+}
+/* ignite halo — a soft radial glow (no blur filter → the GPU just moves/scales a
+   cached texture each frame). Follows the monogram and brightens with --ignite. */
+.act__monoglow {
+  position: absolute; left: 50%; bottom: 0; z-index: 2;
+  width: min(150vh, 188vw); aspect-ratio: 1 / 1;
+  transform: translate(-50%, calc(44% - var(--mono-rise, 0) * 48%))
+             scale(calc(1 - 0.4 * var(--mono-rise, 0)));
+  background: radial-gradient(closest-side,
+              rgba(217,169,78,0.40), rgba(198,122,46,0.16) 44%, transparent 70%);
+  opacity: calc(var(--ignite, 0) * (1 - var(--dim, 0)));
   pointer-events: none; will-change: transform, opacity;
 }
 
@@ -296,7 +316,12 @@
   position: absolute; inset: 0;
   -webkit-mask: url("../ZV_logo.png") center / contain no-repeat;
   mask: url("../ZV_logo.png") center / contain no-repeat;
-  will-change: transform, opacity;
+}
+/* only the layers whose OPACITY animates per frame get their own compositor
+   layer, so their changes are GPU-composited (no repaint). extrude + face are
+   static and paint into the base layer — fewer layers, no wasted memory. */
+.mono__shadow, .mono__rim--cool, .mono__rim--warm, .mono__glow, .mono__sheen {
+  will-change: opacity;
 }
 /* soft contact shadow cast down-behind the object */
 .mono__shadow {
@@ -340,15 +365,22 @@
   opacity: calc(var(--ignite) * 0.82);
   mix-blend-mode: screen;
 }
-/* travelling specular streak */
+/* travelling specular streak. The streak lives in a child <i> that moves via
+   TRANSFORM (compositor-only, no repaint) while the parent's ZV mask clips it to
+   the logo shape — instead of animating background-position, which repainted this
+   whole big masked layer on every frame, forever. */
 .mono__sheen {
-  background: linear-gradient(112deg, transparent 40%, rgba(255,247,224,0.95) 49%, transparent 57%);
-  background-size: 260% 260%;
   opacity: calc(0.12 + 0.85 * var(--ignite));
   mix-blend-mode: screen;
-  animation: sheen 7s var(--ease-io) infinite;
+  overflow: hidden;
 }
-@keyframes sheen { 0%{background-position:130% 0} 100%{background-position:-50% 0} }
+.mono__sheen > i {
+  position: absolute; top: 0; bottom: 0; left: -55%; right: -55%;
+  background: linear-gradient(112deg, transparent 44%, rgba(255,247,224,0.95) 50%, transparent 56%);
+  animation: sheen 7s var(--ease-io) infinite;
+  will-change: transform;
+}
+@keyframes sheen { 0% { transform: translateX(34%); } 100% { transform: translateX(-34%); } }
 @media (prefers-reduced-motion: reduce) { .mono__sheen { animation: none; } }
 
 /* --- pain pills: a scattered stream that rises with scroll (driven per
