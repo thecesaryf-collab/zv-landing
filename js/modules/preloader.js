@@ -12,7 +12,7 @@ export function initPreloader() {
   if (!pre) { root.classList.add('is-loaded'); return; }
 
   const start = performance.now();
-  const MIN_MS = 550;    // don't flash the loader for a blink
+  const MIN_MS = 250;    // don't flash the loader for a blink (kept short — feels snappy)
   const MAX_MS = 5000;   // fail open: never hang on a bad/slow connection
   let done = false;
 

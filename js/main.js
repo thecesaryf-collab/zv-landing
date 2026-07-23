@@ -4,15 +4,23 @@
 // with fresh CSS silently breaks reveals). Keep lib/util.js UNVERSIONED so every
 // module shares one instance of its rAF loop + scroll state. Bump on each change.
 import { revealOnView } from './lib/util.js';
-import { initPreloader } from './modules/preloader.js?v=21';
-import { initNav } from './modules/nav.js?v=21';
-import { initTicker } from './modules/hero-ticker.js?v=21';
-import { initAct } from './modules/act.js?v=21';
-import { initServices } from './modules/services.js?v=21';
-import { initTestimonials } from './modules/testimonials.js?v=21';
-import { initProcess } from './modules/process.js?v=21';
-import { initWhatsApp } from './modules/whatsapp.js?v=21';
-import { initContact } from './modules/contact.js?v=21';
+import { initPreloader } from './modules/preloader.js?v=22';
+import { initNav } from './modules/nav.js?v=22';
+import { initTicker } from './modules/hero-ticker.js?v=22';
+import { initAct } from './modules/act.js?v=22';
+import { initServices } from './modules/services.js?v=22';
+import { initTestimonials } from './modules/testimonials.js?v=22';
+import { initProcess } from './modules/process.js?v=22';
+import { initWhatsApp } from './modules/whatsapp.js?v=22';
+import { initContact } from './modules/contact.js?v=22';
+
+// Land at the TOP on load/refresh: the browser was restoring a previous scroll
+// position (reopening mid-page, e.g. on "Proceso"). Disable that and pin to top,
+// unless the URL explicitly points at an #anchor.
+if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+const toTop = () => { if (!location.hash) window.scrollTo(0, 0); };
+toTop();
+window.addEventListener('load', toTop);
 
 function boot() {
   initPreloader();

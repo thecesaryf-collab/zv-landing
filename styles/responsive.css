@@ -42,9 +42,13 @@
      constant no matter how much a shorter word is scaled up. */
   .ticker {
     text-align: center;
+    /* scale from the TOP so the window's top edge (where words vanish) stays put
+       just below "Más" instead of rising into it when a short word scales up.
+       Plus a small gap so that disappear line sits clearly lower. */
     transform: scale(var(--word-scale, 1));
-    transform-origin: center 27%;
+    transform-origin: center top;
     transition: width 0.6s var(--ease-io), transform 0.6s var(--ease-io);
+    margin-top: 0.18em;
     margin-bottom: 0.5em;
   }
   .hero__subtitle { font-size: var(--step-1); }
@@ -166,6 +170,8 @@
   /* ---- Contact: columns stack ---- */
   .contact__cols { grid-template-columns: 1fr; }
   .contact__col[data-reveal] { --rd: 0s; }   /* no stagger when stacked */
+  /* map is SQUARE on phones (stacked it was stretching super tall) */
+  .contact__map { flex: none; min-height: 0; aspect-ratio: 1 / 1; }
   /* keep "¿Te ayudamos?" on one line even on the narrowest phones */
   .contact__heading { font-size: clamp(2rem, 8.2vw, 3.2rem); }
 

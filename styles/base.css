@@ -198,6 +198,7 @@ h1, h2, h3 {
 }
 .preloader.is-done { opacity: 0; visibility: hidden; pointer-events: none; }
 .preloader__logo {
+  grid-area: 1 / 1; place-self: center;   /* share the centre cell with the ring */
   width: 78px; height: 78px; display: block;
   -webkit-mask: url("../ZV_logo.png") center / contain no-repeat;
           mask: url("../ZV_logo.png") center / contain no-repeat;
@@ -208,6 +209,15 @@ h1, h2, h3 {
   background-size: 260% 100%;
   animation: preloader-sheen 1.25s ease-in-out infinite;
 }
+/* spinning ring around the logo = clear "loading" cue */
+.preloader::after {
+  content: ""; grid-area: 1 / 1; place-self: center;
+  width: 128px; height: 128px; border-radius: 50%;
+  border: 2px solid rgba(217, 169, 78, 0.15);
+  border-top-color: var(--gold);
+  animation: preloader-spin 0.85s linear infinite;
+}
+@keyframes preloader-spin { to { transform: rotate(360deg); } }
 @keyframes preloader-sheen { 0% { background-position: 135% 0; } 100% { background-position: -55% 0; } }
 @keyframes preloader-failsafe { to { opacity: 0; visibility: hidden; pointer-events: none; } }
 
@@ -222,7 +232,7 @@ html:not(.is-loaded) .act__hero {
 @keyframes hero-reveal-failsafe { to { opacity: 1; filter: none; } }
 
 @media (prefers-reduced-motion: reduce) {
-  .preloader, .preloader__logo { animation: none; }
+  .preloader, .preloader__logo, .preloader::after { animation: none; }
   .act__hero { transition: none; }
   html:not(.is-loaded) .act__hero { opacity: 1; filter: none; animation: none; }
 }

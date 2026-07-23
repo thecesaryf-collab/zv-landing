@@ -170,10 +170,13 @@
   padding: 0 7vw;
   transform: translateY(calc(var(--text-y, 82) * 1vh));
   opacity: var(--paint-op, 1);
-  /* no animated blur: changing the blur radius per frame re-rasterises the text
-     every frame during its fade-out. The opacity fade alone reads clean. */
+  /* blur is a fixed radius toggled by a CLASS (not a per-frame value), so it
+     rasterises once and just transitions — no per-frame re-raster. */
+  transition: filter 0.35s var(--ease-out);
   will-change: transform, opacity;
 }
+/* while the pain chips stream over the title, soft-blur it so the chips read */
+.act__paintext.is-behind-pills { filter: blur(2.6px); }
 .act__paintext span {
   font-family: var(--font-display); font-weight: 400;
   font-size: clamp(2.3rem, 6.2vw, 5.4rem); line-height: 1.04; letter-spacing: -0.02em;

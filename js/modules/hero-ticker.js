@@ -85,5 +85,5 @@ export function initTicker() {
     }
   };
 
-  setInterval(cycle, 2600);
+  setInterval(cycle, 2000);
 }

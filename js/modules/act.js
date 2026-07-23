@@ -165,6 +165,9 @@ export function initAct() {
       paintEl.style.transform = `translateY(${textY.toFixed(2)}vh)`;
       paintEl.style.opacity = paintOp.toFixed(3);
       paintEl.style.setProperty('--wipe', wipe.toFixed(3));
+      // soft-blur the title while the pain chips stream OVER it, so the chip text
+      // reads cleanly. Class toggle (not a per-frame radius) → rasterises once.
+      paintEl.classList.toggle('is-behind-pills', p > 0.15 && p < 0.52);
     }
 
     // ---- hero copy + scroll cue ----
@@ -197,6 +200,13 @@ export function initAct() {
     const cStart = 0.44, cEnd = 0.92;
     const cpr = mapClamp(p, cStart, cEnd);
     const yTitle = 114 - 103 * cpr;                    // title top (vh from top)
+
+    // slight blur on the ZV as the solution title crosses in front (~mid-handoff),
+    // pushing the logo back so the white copy reads over it. Ramps in cpr 0.3→0.6.
+    if (seqCanvas) {
+      const zvBlur = mapClamp(cpr, 0.30, 0.58) * 4.5;   // px
+      seqCanvas.style.filter = zvBlur > 0.06 ? `blur(${zvBlur.toFixed(2)}px)` : '';
+    }
 
     const pa   = mapClamp(cpr, 0.0, 0.78);             // phase A (separate + rise)
     const sepA = lerp(11, 27, pa);                     // gap grows: title pulls ahead
