@@ -92,27 +92,28 @@
   .act__aura { display: none; }         /* full-viewport ambient layer — not part of the ZV itself */
   .act__bg::after { display: none; }    /* full-viewport warm-lift layer — not part of the ZV itself */
 
-  /* ---- MOBILE COMPOSITING: kill per-frame REPAINTS, not layers ----
-     The real phone lag wasn't fill-rate (blending): it was that act.js writes an
-     opacity to the ignite sub-layers EVERY frame, and when those masked layers
-     aren't promoted, each write re-rasterises the whole 128vw masked monogram
-     texture per frame. So we keep the two layers that MUST animate (warm key-rim
-     + gold ignite glow) PROMOTED → their opacity changes are compositor-only, no
-     repaint. The cool rim + sheen are BAKED to a static lit level (act.js stops
-     writing them on phones), so they paint into the monogram ONCE and never
-     re-raster it mid-scroll — the full 3D/extrusion look is preserved, just not
-     re-lit per frame. Net: 4 blended layers over the logo (base + warm-rim +
-     glow + halo), down from 7, and ZERO per-frame repaints. */
-  .mono__rim--warm, .mono__glow { will-change: opacity; }
-  .mono__rim--cool { will-change: auto; opacity: 0.5; }   /* baked teal edge light */
-  .mono__sheen     { will-change: auto; opacity: 0.42; }  /* baked specular */
+  /* ---- MOBILE: BAKE the whole monogram into ONE flattened texture ----
+     The structural fill-rate wall on weak phones is blending several full-screen
+     ZV-MASKED layers every frame at the device pixel ratio. So on phones we pin
+     every ignite sub-layer (rims / glow / sheen) at its fully-LIT opacity and
+     DE-PROMOTE it, so it paints into .act__mono's single backing store. act.js
+     stops writing all of them on phones, so NOTHING inside the logo changes per
+     frame: the texture rasterises ONCE and thereafter only transforms / scales /
+     fades (compositor-only). The "encendido" becomes the whole lit texture FADING
+     IN (act.js drives .act__mono opacity by --ignite) plus the cheap radial halo.
+     The 3D/extrusion look is fully preserved — all layers are still there, just
+     flattened. Per frame over the logo: 1 texture + 1 halo, no masked re-blends,
+     no repaints. Desktop keeps the per-frame relight untouched. */
+  .mono__rim--cool { will-change: auto; opacity: 0.68; }  /* all pinned at full ignite */
+  .mono__rim--warm { will-change: auto; opacity: 1;    }
+  .mono__glow      { will-change: auto; opacity: 0.72; }
+  .mono__sheen     { will-change: auto; opacity: 0.95; }
   /* the travelling specular ran on an INFINITE animation → constant compositing
-     even while idle. Freeze it to a static highlight on phones. */
+     even while idle. Freeze it to a static highlight baked into the texture. */
   .mono__sheen > i { animation: none; transform: translateX(0); }
   /* .act__corners keeps animating its warm opacity every frame, so leave it
-     PROMOTED (base rule's will-change: opacity) — that's compositor-only instead
-     of repainting a full-screen 4-gradient layer. Only .act__bg is de-promoted
-     (its opacity only shifts during the brief end dim-out). */
+     PROMOTED (base rule's will-change: opacity) — compositor-only instead of
+     repainting a full-screen 4-gradient layer. Only .act__bg is de-promoted. */
   .act__bg { will-change: auto; }
 
   /* pills keep flowing, but centred full-width (no left/right scatter) */

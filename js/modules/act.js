@@ -60,9 +60,10 @@ export function initAct() {
   let isMobile = mqMobile.matches;
   mqMobile.addEventListener?.('change', e => {
     isMobile = e.matches;
-    // drop any inline opacity left by desktop frames so the baked CSS value
-    // (responsive.css) takes over — inline styles otherwise outrank it.
-    if (isMobile) { if (rimCool) rimCool.style.opacity = ''; if (monoSheen) monoSheen.style.opacity = ''; }
+    // drop any inline opacity left by desktop frames so the baked CSS values
+    // (responsive.css) take over — inline styles otherwise outrank them.
+    if (isMobile) [rimCool, rimWarm, monoGlowLay, monoSheen]
+      .forEach(el => { if (el) el.style.opacity = ''; });
   });
 
   if (prefersReducedMotion) {
@@ -140,15 +141,23 @@ export function initAct() {
 
     // ---- monogram + halo (transform via --mono-rise so the mobile media-query
     //      can override the translate constants; opacities written directly) ----
+    // halo: one cheap radial layer, always animated (opacity + rise)
     if (monoglowEl) { monoglowEl.style.opacity = (ignite * notDim).toFixed(3); monoglowEl.style.setProperty('--mono-rise', monoRise.toFixed(3)); }
-    if (monoEl) { monoEl.style.opacity = notDim.toFixed(3); monoEl.style.setProperty('--mono-rise', monoRise.toFixed(3)); }
-    setOpacity(rimWarm,     (0.16 + 0.84 * ignite).toFixed(3));
-    setOpacity(monoGlowLay, (ignite * 0.72).toFixed(3));
-    // cool rim + sheen are baked to a static lit level on phones (no per-frame
-    // write → no repaint of the masked monogram); animated only on desktop.
+    if (monoEl) {
+      // PHONES: the whole monogram is ONE baked-lit texture (every rim/glow/sheen
+      // is pinned lit in responsive.css and flattened in). Nothing inside changes
+      // per frame, so it rasterises ONCE and only transforms/fades. We fade the
+      // lit texture IN with --ignite (dark → lights up → powers off) — that's the
+      // "encendido", compositor-only. DESKTOP keeps mono fully opaque and relights
+      // each rim layer per frame below.
+      monoEl.style.opacity = (isMobile ? ignite : notDim).toFixed(3);
+      monoEl.style.setProperty('--mono-rise', monoRise.toFixed(3));
+    }
     if (!isMobile) {
-      setOpacity(rimCool,   (0.28 + 0.40 * ignite).toFixed(3));
-      setOpacity(monoSheen, (0.12 + 0.85 * ignite).toFixed(3));
+      setOpacity(rimCool,     (0.28 + 0.40 * ignite).toFixed(3));
+      setOpacity(rimWarm,     (0.16 + 0.84 * ignite).toFixed(3));
+      setOpacity(monoGlowLay, (ignite * 0.72).toFixed(3));
+      setOpacity(monoSheen,   (0.12 + 0.85 * ignite).toFixed(3));
     }
 
     // ---- pain title (transform/opacity direct; --wipe drives the span mask) ----
