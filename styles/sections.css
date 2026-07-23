@@ -102,10 +102,14 @@
 .act { position: relative; height: 480vh; background: #000; }  /* resolves to PURE black */
 .act__sticky {
   position: sticky; top: 0;
-  /* dvh, not svh: svh is the SMALL viewport, so when the mobile browser bar
-     hides and the viewport grows, an svh sticky was shorter than the screen and
-     the section's black showed underneath. dvh always matches the live viewport. */
-  height: 100vh; height: 100dvh;
+  /* lvh (LARGE viewport = mobile bar collapsed), NOT dvh/svh:
+     · dvh tracks the LIVE viewport, so when the URL bar hides and the viewport
+       grows, the stage grew too and the bottom-anchored ZV jerked downward.
+     · svh (small) was shorter than the screen once the bar hid → black gap.
+     lvh sizes the stage to the bar-HIDDEN height from the start: with the bar
+     visible the scene simply extends under it (bar overlays), and collapsing the
+     bar just REVEALS the lower part of the ZV/plane — no reflow, no jump. */
+  height: 100vh; height: 100lvh;
   overflow: hidden; isolation: isolate;
 }
 

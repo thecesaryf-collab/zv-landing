@@ -98,7 +98,12 @@ export function initAct() {
   let travel = 1, actTop = 0;
   let lastScrolled = NaN;
   const measure = () => {
-    travel = Math.max(1, act.offsetHeight - window.innerHeight);
+    // travel from the STAGE's own height (a fixed 100lvh), NOT window.innerHeight.
+    // On mobile the URL bar showing/hiding changes innerHeight live; deriving the
+    // scroll→progress mapping from it made the pinned ZV jerk every time the bar
+    // collapsed. stage.offsetHeight is the large-viewport height and stays put, so
+    // the bar just reveals/hides the lower part of the scene with no reflow.
+    travel = Math.max(1, act.offsetHeight - stage.offsetHeight);
     actTop = act.getBoundingClientRect().top + window.scrollY;
     lastScrolled = NaN;   // force a recompute after a resize even if scroll didn't move
   };
