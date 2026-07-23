@@ -6,7 +6,20 @@
      · glass pills rise in a scattered stream, passing OVER the docked title
      · a wide conclusion pill closes the case, then drops/blurs away while
        the "Nuestros servicios" handoff title swaps in
-     · background warms, the ZV monogram ignites then rises + shrinks        */
+     · background warms, the ZV monogram ignites then rises + shrinks
+
+   PERFORMANCE — why this doesn't set CSS vars on one parent:
+   Writing inherited custom properties (--warm, --ignite, …) on the shared
+   .act__sticky wrapper forces the browser to recompute STYLE for its ENTIRE
+   subtree (bg layers + the 7-layer monogram + hero + 5 pills + solution) on
+   EVERY frame, before it can even composite. That main-thread recalc — not
+   GPU fill-rate — is what pinned the section at ~half FPS on weak devices.
+   So instead we write the final transform/opacity DIRECTLY on each layer
+   (compositor-only: no subtree recalc, no layout, no paint). Custom props are
+   kept ONLY where they're unavoidable: the mono/glow TRANSFORMS (a mobile
+   media-query overrides their translate constants, so the value must flow
+   through CSS) and the bg warm pools (they live in ::before/::after
+   pseudo-elements, which can't take inline styles). */
 import { onFrame, clamp, lerp, mapClamp, prefersReducedMotion } from '../lib/util.js';
 
 export function initAct() {
@@ -18,25 +31,69 @@ export function initAct() {
   const solBody = act?.querySelector('[data-sol-body]');
   if (!act || !stage) return;
 
-  const setVars = (o) => { for (const k in o) stage.style.setProperty(k, o[k]); };
+  // individual layers we drive directly (compositor-only writes)
+  const bgEl        = act.querySelector('.act__bg');        // keeps --warm/--dim for its ::before/::after pools
+  const cornersEl   = act.querySelector('.act__corners');
+  const auraEl      = act.querySelector('.act__aura');
+  const monoglowEl  = act.querySelector('.act__monoglow');
+  const monoEl      = act.querySelector('.act__mono');
+  const rimCool     = act.querySelector('.mono__rim--cool');
+  const rimWarm     = act.querySelector('.mono__rim--warm');
+  const monoGlowLay = act.querySelector('.mono__glow');
+  const monoSheen   = act.querySelector('.mono__sheen');
+  const paintEl     = act.querySelector('.act__paintext');
+  const cueEl       = act.querySelector('.act__cue');
+
   const pv = (el, o) => { for (const k in o) el.style.setProperty(k, o[k]); };
+  const setOpacity = (el, v) => { if (el) el.style.opacity = v; };
 
   const root = document.documentElement;
 
+  // On phones we BAKE the cool rim + sheen to a static lit level (see
+  // responsive.css). act.js therefore stops writing their opacity per frame, so
+  // their big masked layers paint into the monogram ONCE and never re-rasterise
+  // it mid-scroll. Only the warm key-rim + gold ignite glow stay animated (and
+  // stay promoted → those opacity writes are compositor-only, no repaint). That
+  // per-frame REPAINT of the 128vw masked monogram — not fill-rate — was the
+  // real source of the mobile lag.
+  const mqMobile = window.matchMedia('(max-width: 760px)');
+  let isMobile = mqMobile.matches;
+  mqMobile.addEventListener?.('change', e => {
+    isMobile = e.matches;
+    // drop any inline opacity left by desktop frames so the baked CSS value
+    // (responsive.css) takes over — inline styles otherwise outrank it.
+    if (isMobile) { if (rimCool) rimCool.style.opacity = ''; if (monoSheen) monoSheen.style.opacity = ''; }
+  });
+
   if (prefersReducedMotion) {
-    setVars({ '--hero-y': '0', '--ignite': '0.9', '--warm': '0.9', '--text-y': '-36',
-              '--wipe': '1', '--paint-op': '1', '--paint-bl': '0', '--mono-rise': '1',
-              '--cue-op': '1' });
+    // static "settled" state — everything visible, nothing animating
+    if (bgEl) { bgEl.style.setProperty('--warm', '0.9'); bgEl.style.setProperty('--dim', '0'); }
+    setOpacity(cornersEl, '0.928');
+    if (auraEl) { auraEl.style.opacity = '0.928'; auraEl.style.transform = 'translateY(0px)'; }
+    if (monoglowEl) { monoglowEl.style.opacity = '0.9'; monoglowEl.style.setProperty('--mono-rise', '1'); }
+    if (monoEl) { monoEl.style.opacity = '1'; monoEl.style.setProperty('--mono-rise', '1'); }
+    setOpacity(rimCool, '0.64'); setOpacity(rimWarm, '0.916');
+    setOpacity(monoGlowLay, '0.648'); setOpacity(monoSheen, '0.885');
+    if (paintEl) { paintEl.style.transform = 'translateY(-36vh)'; paintEl.style.opacity = '1'; paintEl.style.setProperty('--wipe', '1'); }
+    if (heroCopy) heroCopy.style.transform = 'translate(-50%, 0px)';
+    setOpacity(cueEl, '0');
     root.style.setProperty('--svc-title-in', '1');
     root.style.setProperty('--svc-title-y', '0');
-    pills.forEach(p => pv(p, { '--py': '0', '--op': '1', '--bl': '0' }));
+    pills.forEach(p => pv(p, { '--py': '0', '--op': '1' }));
     if (solTitle) pv(solTitle, { '--sol-y': '20', '--sol-op': '1', '--sol-wipe': '1' });
     if (solBody) pv(solBody, { '--sol-y': '40', '--sol-op': '1', '--sol-wipe': '1' });
     return;
   }
 
-  let travel = 1;
-  const measure = () => { travel = Math.max(1, act.offsetHeight - window.innerHeight); };
+  // cache the section's document offset so the per-frame loop never calls
+  // getBoundingClientRect (which would force a synchronous layout every frame)
+  let travel = 1, actTop = 0;
+  let lastScrolled = NaN;
+  const measure = () => {
+    travel = Math.max(1, act.offsetHeight - window.innerHeight);
+    actTop = act.getBoundingClientRect().top + window.scrollY;
+    lastScrolled = NaN;   // force a recompute after a resize even if scroll didn't move
+  };
   measure();
   window.addEventListener('resize', measure);
   window.addEventListener('load', measure);
@@ -44,8 +101,11 @@ export function initAct() {
   const PILL_SPAN = 0.40;
 
   onFrame(() => {
-    const top = act.getBoundingClientRect().top + window.scrollY;
-    const scrolled = window.scrollY - top;
+    const scrolled = window.scrollY - actTop;
+    // nothing moved since last frame → skip all work (idle = no recompositing)
+    if (scrolled === lastScrolled) return;
+    lastScrolled = scrolled;
+
     const p = clamp(scrolled / travel);
     const vh = window.innerHeight;
 
@@ -62,6 +122,7 @@ export function initAct() {
     const warm     = (0.15 + 0.85 * mapClamp(p, 0.0, 0.55)) * (1 - dimOut);
     const ignite   = mapClamp(p, 0.04, 0.42) * (1 - dimOut);      // ZV lights, then powers back down
     const monoRise = mapClamp(p, 0.38, 0.66);
+    const notDim   = 1 - dimOut;
 
     // pain title: rise early → dock a little below the nav → fade quickly
     const titleRise = mapClamp(p, 0.04, 0.22);
@@ -70,26 +131,42 @@ export function initAct() {
     // fades a touch later — fine if the first pill is already crossing over it
     const titleFade = mapClamp(p, 0.36, 0.50);
     const paintOp = 1 - titleFade;
-    const paintBl = titleFade * 10;
 
-    setVars({
-      '--hero-y':   heroY.toFixed(1),
-      '--cue-op':   cueOp.toFixed(3),
-      '--aura-y':   auraY.toFixed(1),
-      '--warm':     warm.toFixed(3),
-      '--ignite':   ignite.toFixed(3),
-      '--dim':      dimOut.toFixed(3),      // fades the ZV object + edge glow to nothing
-      '--mono-op':  (1 - dimOut).toFixed(3),
-      '--mono-rise': monoRise.toFixed(3),
-      '--text-y':   textY.toFixed(2),
-      '--wipe':     wipe.toFixed(3),
-      '--paint-op': paintOp.toFixed(3),
-      '--paint-bl': paintBl.toFixed(2),
-    });
+    // ---- background field (direct opacity; --warm/--dim only for the bg pools) ----
+    if (bgEl) { bgEl.style.setProperty('--warm', warm.toFixed(3)); bgEl.style.setProperty('--dim', dimOut.toFixed(3)); }
+    const fieldOp = (0.28 + 0.72 * warm) * notDim;
+    setOpacity(cornersEl, fieldOp.toFixed(3));
+    if (auraEl) { auraEl.style.opacity = fieldOp.toFixed(3); auraEl.style.transform = `translateY(${auraY.toFixed(1)}px)`; }
+
+    // ---- monogram + halo (transform via --mono-rise so the mobile media-query
+    //      can override the translate constants; opacities written directly) ----
+    if (monoglowEl) { monoglowEl.style.opacity = (ignite * notDim).toFixed(3); monoglowEl.style.setProperty('--mono-rise', monoRise.toFixed(3)); }
+    if (monoEl) { monoEl.style.opacity = notDim.toFixed(3); monoEl.style.setProperty('--mono-rise', monoRise.toFixed(3)); }
+    setOpacity(rimWarm,     (0.16 + 0.84 * ignite).toFixed(3));
+    setOpacity(monoGlowLay, (ignite * 0.72).toFixed(3));
+    // cool rim + sheen are baked to a static lit level on phones (no per-frame
+    // write → no repaint of the masked monogram); animated only on desktop.
+    if (!isMobile) {
+      setOpacity(rimCool,   (0.28 + 0.40 * ignite).toFixed(3));
+      setOpacity(monoSheen, (0.12 + 0.85 * ignite).toFixed(3));
+    }
+
+    // ---- pain title (transform/opacity direct; --wipe drives the span mask) ----
+    if (paintEl) {
+      paintEl.style.transform = `translateY(${textY.toFixed(2)}vh)`;
+      paintEl.style.opacity = paintOp.toFixed(3);
+      paintEl.style.setProperty('--wipe', wipe.toFixed(3));
+    }
+
+    // ---- hero copy + scroll cue ----
+    if (heroCopy) heroCopy.style.transform = `translate(-50%, ${heroY.toFixed(1)}px)`;
+    setOpacity(cueEl, (1 - cueOp).toFixed(3));
 
     heroCopy?.classList.toggle('is-hidden', scrolled > vh * 0.8);
 
-    // pain pills: staggered stream rising from below and out the top
+    // pain pills: staggered stream rising from below and out the top. Each pill's
+    // vars live on the pill itself (a tiny subtree), and --py must stay a var so
+    // the mobile media-query can recentre the transform.
     pills.forEach((pill, i) => {
       const start = 0.16 + i * 0.045;
       const pr = mapClamp(p, start, start + PILL_SPAN);
@@ -99,12 +176,11 @@ export function initAct() {
       pv(pill, {
         '--py': py.toFixed(2),
         '--op': (fadeIn * (1 - fadeOut)).toFixed(3),
-        '--bl': (fadeOut * 5).toFixed(2),
       });
     });
 
     // ---- solution: loose title + trailing subtitle/button (no glass pill) ----
-    // The title "Nosotros lo solucionamos" rises IN FRONT of the ZV. The
+    // The title "Nosotros nos ocupamos." rises IN FRONT of the ZV. The
     // subtitle+button start a bit LOWER and rise a bit SLOWER (the gap grows,
     // so the title pulls ahead). During the handoff they CATCH UP (gap shrinks)
     // to fuse just under the title, and the whole group crossfades into the

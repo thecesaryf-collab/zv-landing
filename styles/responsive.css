@@ -91,6 +91,30 @@
   }
   .act__aura { display: none; }         /* full-viewport ambient layer — not part of the ZV itself */
   .act__bg::after { display: none; }    /* full-viewport warm-lift layer — not part of the ZV itself */
+
+  /* ---- MOBILE COMPOSITING: kill per-frame REPAINTS, not layers ----
+     The real phone lag wasn't fill-rate (blending): it was that act.js writes an
+     opacity to the ignite sub-layers EVERY frame, and when those masked layers
+     aren't promoted, each write re-rasterises the whole 128vw masked monogram
+     texture per frame. So we keep the two layers that MUST animate (warm key-rim
+     + gold ignite glow) PROMOTED → their opacity changes are compositor-only, no
+     repaint. The cool rim + sheen are BAKED to a static lit level (act.js stops
+     writing them on phones), so they paint into the monogram ONCE and never
+     re-raster it mid-scroll — the full 3D/extrusion look is preserved, just not
+     re-lit per frame. Net: 4 blended layers over the logo (base + warm-rim +
+     glow + halo), down from 7, and ZERO per-frame repaints. */
+  .mono__rim--warm, .mono__glow { will-change: opacity; }
+  .mono__rim--cool { will-change: auto; opacity: 0.5; }   /* baked teal edge light */
+  .mono__sheen     { will-change: auto; opacity: 0.42; }  /* baked specular */
+  /* the travelling specular ran on an INFINITE animation → constant compositing
+     even while idle. Freeze it to a static highlight on phones. */
+  .mono__sheen > i { animation: none; transform: translateX(0); }
+  /* .act__corners keeps animating its warm opacity every frame, so leave it
+     PROMOTED (base rule's will-change: opacity) — that's compositor-only instead
+     of repainting a full-screen 4-gradient layer. Only .act__bg is de-promoted
+     (its opacity only shifts during the brief end dim-out). */
+  .act__bg { will-change: auto; }
+
   /* pills keep flowing, but centred full-width (no left/right scatter) */
   .act__pains .pain,
   .act__pains .pain:nth-child(1),

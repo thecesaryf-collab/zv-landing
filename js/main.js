@@ -4,15 +4,15 @@
 // with fresh CSS silently breaks reveals). Keep lib/util.js UNVERSIONED so every
 // module shares one instance of its rAF loop + scroll state. Bump on each change.
 import { revealOnView } from './lib/util.js';
-import { initPreloader } from './modules/preloader.js?v=13';
-import { initNav } from './modules/nav.js?v=13';
-import { initTicker } from './modules/hero-ticker.js?v=13';
-import { initAct } from './modules/act.js?v=13';
-import { initServices } from './modules/services.js?v=13';
-import { initTestimonials } from './modules/testimonials.js?v=13';
-import { initProcess } from './modules/process.js?v=13';
-import { initWhatsApp } from './modules/whatsapp.js?v=13';
-import { initContact } from './modules/contact.js?v=13';
+import { initPreloader } from './modules/preloader.js?v=16';
+import { initNav } from './modules/nav.js?v=16';
+import { initTicker } from './modules/hero-ticker.js?v=16';
+import { initAct } from './modules/act.js?v=16';
+import { initServices } from './modules/services.js?v=16';
+import { initTestimonials } from './modules/testimonials.js?v=16';
+import { initProcess } from './modules/process.js?v=16';
+import { initWhatsApp } from './modules/whatsapp.js?v=16';
+import { initContact } from './modules/contact.js?v=16';
 
 function boot() {
   initPreloader();
