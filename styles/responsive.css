@@ -50,71 +50,17 @@
   .hero__subtitle { font-size: var(--step-1); }
 
   .act__paintext span { font-size: clamp(2rem, 9vw, 3.2rem); }
-  /* The 3D monogram is smaller on a phone, so at the same --mono-rise it only
-     climbs ~a third of the screen. Push its travel further so it reaches the
-     middle of the viewport like it does on desktop. */
-  /* PERFORMANCE on phones (weak GPUs are FILL-RATE bound = steady low FPS): the
-     monogram + halo are enormous, and every composited layer stacked on top is
-     more pixels the GPU has to blend each frame. We shrink both — with the
-     translate %s recomputed so the on-screen position/travel is IDENTICAL. */
-  .act__mono {
-    width: 128vw;   /* was 150vw; %s below keep the exact peek (66vw) + rise (-57vw) */
-    transform: translate(-50%, calc(52% - var(--mono-rise, 0) * 96%))
-               scale(calc(1 - 0.4 * var(--mono-rise, 0)));
+  /* ZV image sequence: wider on a phone so the logo reads big, and pushed a bit
+     lower so it peeks from below like on desktop. Just a <canvas> that draws one
+     frame per scroll position — no masks/layers, so no fill-rate wall. TUNE the
+     width + translate to taste. */
+  .act__seq {
+    width: 178vw;
+    transform: translate(-50%, calc(20% - var(--mono-rise, 0) * 34%))
+               scale(calc(1 - 0.3 * var(--mono-rise, 0)));
   }
-  .act__monoglow {
-    width: 150vw;   /* was 188vw; matched to the mono's on-screen position */
-    transform: translate(-50%, calc(44% - var(--mono-rise, 0) * 82%))
-               scale(calc(1 - 0.4 * var(--mono-rise, 0)));
-  }
-  /* Mask ONCE on the group for the layers that sit FLUSH with the container
-     (face / glow / sheen) — for those, one shared mask looks identical to
-     masking each individually, since they aren't offset from the box.
-     .mono__extrude and .mono__rim--* are duplicate copies nudged a few px
-     off-centre to fake extruded thickness + edge light (the "3D" trick), and
-     THAT only reads correctly if the offset copy carries its OWN mask, so the
-     mask travels WITH the offset and a sliver peeks out past the front face.
-     Sharing the group mask instead (as before) clipped them back to the
-     UN-offset window and erased that sliver — which is what flattened the
-     look. So: 1 shared mask + 3 individual masks, still well under the
-     original 6 since face/glow/sheen ride the shared one for free. */
-  .mono {
-    -webkit-mask: url("../ZV_logo.png") center / contain no-repeat;
-            mask: url("../ZV_logo.png") center / contain no-repeat;
-  }
-  .mono > span { -webkit-mask: none; mask: none; }
-  .mono__extrude,
-  .mono__rim--cool,
-  .mono__rim--warm {
-    -webkit-mask: url("../ZV_logo.png") center / contain no-repeat;
-            mask: url("../ZV_logo.png") center / contain no-repeat;
-  }
-  .act__aura { display: none; }         /* full-viewport ambient layer — not part of the ZV itself */
-  .act__bg::after { display: none; }    /* full-viewport warm-lift layer — not part of the ZV itself */
-
-  /* ---- MOBILE: BAKE the whole monogram into ONE flattened texture ----
-     The structural fill-rate wall on weak phones is blending several full-screen
-     ZV-MASKED layers every frame at the device pixel ratio. So on phones we pin
-     every ignite sub-layer (rims / glow / sheen) at its fully-LIT opacity and
-     DE-PROMOTE it, so it paints into .act__mono's single backing store. act.js
-     stops writing all of them on phones, so NOTHING inside the logo changes per
-     frame: the texture rasterises ONCE and thereafter only transforms / scales /
-     fades (compositor-only). The "encendido" becomes the whole lit texture FADING
-     IN (act.js drives .act__mono opacity by --ignite) plus the cheap radial halo.
-     The 3D/extrusion look is fully preserved — all layers are still there, just
-     flattened. Per frame over the logo: 1 texture + 1 halo, no masked re-blends,
-     no repaints. Desktop keeps the per-frame relight untouched. */
-  .mono__rim--cool { will-change: auto; opacity: 0.68; }  /* all pinned at full ignite */
-  .mono__rim--warm { will-change: auto; opacity: 1;    }
-  .mono__glow      { will-change: auto; opacity: 0.72; }
-  .mono__sheen     { will-change: auto; opacity: 0.95; }
-  /* the travelling specular ran on an INFINITE animation → constant compositing
-     even while idle. Freeze it to a static highlight baked into the texture. */
-  .mono__sheen > i { animation: none; transform: translateX(0); }
-  /* .act__corners keeps animating its warm opacity every frame, so leave it
-     PROMOTED (base rule's will-change: opacity) — compositor-only instead of
-     repainting a full-screen 4-gradient layer. Only .act__bg is de-promoted. */
-  .act__bg { will-change: auto; }
+  .act__aura { display: none; }         /* full-viewport ambient layer — trims fill-rate */
+  .act__bg::after { display: none; }    /* full-viewport warm-lift layer — trims fill-rate */
 
   /* pills keep flowing, but centred full-width (no left/right scatter) */
   .act__pains .pain,

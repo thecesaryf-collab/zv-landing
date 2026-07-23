@@ -6,20 +6,20 @@
      · glass pills rise in a scattered stream, passing OVER the docked title
      · a wide conclusion pill closes the case, then drops/blurs away while
        the "Nuestros servicios" handoff title swaps in
-     · background warms, the ZV monogram ignites then rises + shrinks
+     · background warms, the ZV ignites (image sequence) then rises + shrinks
 
-   PERFORMANCE — why this doesn't set CSS vars on one parent:
-   Writing inherited custom properties (--warm, --ignite, …) on the shared
-   .act__sticky wrapper forces the browser to recompute STYLE for its ENTIRE
-   subtree (bg layers + the 7-layer monogram + hero + 5 pills + solution) on
-   EVERY frame, before it can even composite. That main-thread recalc — not
-   GPU fill-rate — is what pinned the section at ~half FPS on weak devices.
-   So instead we write the final transform/opacity DIRECTLY on each layer
-   (compositor-only: no subtree recalc, no layout, no paint). Custom props are
-   kept ONLY where they're unavoidable: the mono/glow TRANSFORMS (a mobile
-   media-query overrides their translate constants, so the value must flow
-   through CSS) and the bg warm pools (they live in ::before/::after
-   pseudo-elements, which can't take inline styles). */
+   PERFORMANCE:
+   (1) The ZV ignite is a scroll-scrubbed IMAGE SEQUENCE drawn to a single
+       <canvas> (one drawImage per changed frame) instead of the old ~7-layer
+       CSS-masked 3D monogram, whose per-frame blending of several full-screen
+       ZV-masked layers was a structural fill-rate wall on phones.
+   (2) We write the final transform/opacity DIRECTLY on each layer (compositor-
+       only: no subtree recalc, no layout, no paint) rather than setting inherited
+       custom props on the shared .act__sticky wrapper (which would recompute
+       STYLE for its whole subtree every frame). Custom props are kept ONLY where
+       unavoidable: the canvas rise TRANSFORM (a mobile media-query overrides its
+       translate constants, so it must flow through CSS) and the bg warm pools
+       (they live in ::before/::after pseudo-elements, which take no inline style). */
 import { onFrame, clamp, lerp, mapClamp, prefersReducedMotion } from '../lib/util.js';
 
 export function initAct() {
@@ -35,12 +35,6 @@ export function initAct() {
   const bgEl        = act.querySelector('.act__bg');        // keeps --warm/--dim for its ::before/::after pools
   const cornersEl   = act.querySelector('.act__corners');
   const auraEl      = act.querySelector('.act__aura');
-  const monoglowEl  = act.querySelector('.act__monoglow');
-  const monoEl      = act.querySelector('.act__mono');
-  const rimCool     = act.querySelector('.mono__rim--cool');
-  const rimWarm     = act.querySelector('.mono__rim--warm');
-  const monoGlowLay = act.querySelector('.mono__glow');
-  const monoSheen   = act.querySelector('.mono__sheen');
   const paintEl     = act.querySelector('.act__paintext');
   const cueEl       = act.querySelector('.act__cue');
 
@@ -49,32 +43,42 @@ export function initAct() {
 
   const root = document.documentElement;
 
-  // On phones we BAKE the cool rim + sheen to a static lit level (see
-  // responsive.css). act.js therefore stops writing their opacity per frame, so
-  // their big masked layers paint into the monogram ONCE and never re-rasterise
-  // it mid-scroll. Only the warm key-rim + gold ignite glow stay animated (and
-  // stay promoted → those opacity writes are compositor-only, no repaint). That
-  // per-frame REPAINT of the 128vw masked monogram — not fill-rate — was the
-  // real source of the mobile lag.
-  const mqMobile = window.matchMedia('(max-width: 760px)');
-  let isMobile = mqMobile.matches;
-  mqMobile.addEventListener?.('change', e => {
-    isMobile = e.matches;
-    // drop any inline opacity left by desktop frames so the baked CSS values
-    // (responsive.css) take over — inline styles otherwise outrank them.
-    if (isMobile) [rimCool, rimWarm, monoGlowLay, monoSheen]
-      .forEach(el => { if (el) el.style.opacity = ''; });
-  });
+  // ---- ZV ignite = a scroll-scrubbed IMAGE SEQUENCE on one <canvas> ----
+  // A pre-rendered 3D clip (dark → gold) as 106 frames. We draw ONE frame per
+  // scroll position (only when it changes) — no CSS masks/layers, so none of the
+  // per-frame fill-rate/repaint cost the old CSS monogram had. The rise/shrink/
+  // power-off motion still runs in CSS via --mono-rise + the canvas opacity.
+  const SEQ_FRAMES = 106;                       // assets/act/zv-seq/0000.jpg … 0105.jpg
+  const SEQ_PATH   = 'assets/act/zv-seq/';
+  const seqCanvas  = act.querySelector('[data-seq]');
+  const seqCtx     = seqCanvas?.getContext('2d', { alpha: false });
+  const seqImgs    = new Array(SEQ_FRAMES);
+  let seqCur = -1, seqWant = 0;                 // last-drawn / wanted frame index
+  const seqPaint = () => {
+    const img = seqImgs[seqWant];
+    if (!seqCtx || seqCur === seqWant || !img || !img.complete || !img.naturalWidth) return;
+    seqCur = seqWant;
+    seqCtx.drawImage(img, 0, 0, seqCanvas.width, seqCanvas.height);
+  };
+  const seqSet = (i) => { seqWant = i < 0 ? 0 : i >= SEQ_FRAMES ? SEQ_FRAMES - 1 : i; seqPaint(); };
+  if (seqCanvas && seqCtx) {
+    for (let i = 0; i < SEQ_FRAMES; i++) {
+      const img = new Image();
+      img.decoding = 'async';
+      // redraw as soon as the frame the scroll currently wants finishes loading
+      img.onload = () => { if (i === seqWant) seqPaint(); };
+      img.src = `${SEQ_PATH}${String(i).padStart(4, '0')}.jpg`;
+      seqImgs[i] = img;
+    }
+  }
 
   if (prefersReducedMotion) {
     // static "settled" state — everything visible, nothing animating
     if (bgEl) { bgEl.style.setProperty('--warm', '0.9'); bgEl.style.setProperty('--dim', '0'); }
     setOpacity(cornersEl, '0.928');
     if (auraEl) { auraEl.style.opacity = '0.928'; auraEl.style.transform = 'translateY(0px)'; }
-    if (monoglowEl) { monoglowEl.style.opacity = '0.9'; monoglowEl.style.setProperty('--mono-rise', '1'); }
-    if (monoEl) { monoEl.style.opacity = '1'; monoEl.style.setProperty('--mono-rise', '1'); }
-    setOpacity(rimCool, '0.64'); setOpacity(rimWarm, '0.916');
-    setOpacity(monoGlowLay, '0.648'); setOpacity(monoSheen, '0.885');
+    // settled: fully-lit last frame, risen/shrunk, fully opaque
+    if (seqCanvas) { seqSet(SEQ_FRAMES - 1); seqCanvas.style.setProperty('--mono-rise', '1'); seqCanvas.style.opacity = '1'; }
     if (paintEl) { paintEl.style.transform = 'translateY(-36vh)'; paintEl.style.opacity = '1'; paintEl.style.setProperty('--wipe', '1'); }
     if (heroCopy) heroCopy.style.transform = 'translate(-50%, 0px)';
     setOpacity(cueEl, '0');
@@ -116,12 +120,12 @@ export function initAct() {
     // warm aura drifts gently upward as you scroll into the sequence
     const auraY = -clamp(scrolled * 0.06, 0, 90);
 
-    // background + monogram. As the conclusion morphs into the "Nuestros
-    // servicios" title (p ≈ 0.82 → 0.92) the ZV powers back OFF and the warm
-    // pool fades to pure black, so the seam into services is invisible.
+    // background + ZV. As the conclusion morphs into the "Nuestros servicios"
+    // title (p ≈ 0.82 → 0.92) the ZV powers back OFF (opacity) and the warm pool
+    // fades to pure black, so the seam into services is invisible.
     const dimOut   = mapClamp(p, 0.74, 0.92);
     const warm     = (0.15 + 0.85 * mapClamp(p, 0.0, 0.55)) * (1 - dimOut);
-    const ignite   = mapClamp(p, 0.04, 0.42) * (1 - dimOut);      // ZV lights, then powers back down
+    const igniteRaw = mapClamp(p, 0.04, 0.42);   // 0→1 lighting progress (drives the frame index)
     const monoRise = mapClamp(p, 0.38, 0.66);
     const notDim   = 1 - dimOut;
 
@@ -139,25 +143,13 @@ export function initAct() {
     setOpacity(cornersEl, fieldOp.toFixed(3));
     if (auraEl) { auraEl.style.opacity = fieldOp.toFixed(3); auraEl.style.transform = `translateY(${auraY.toFixed(1)}px)`; }
 
-    // ---- monogram + halo (transform via --mono-rise so the mobile media-query
-    //      can override the translate constants; opacities written directly) ----
-    // halo: one cheap radial layer, always animated (opacity + rise)
-    if (monoglowEl) { monoglowEl.style.opacity = (ignite * notDim).toFixed(3); monoglowEl.style.setProperty('--mono-rise', monoRise.toFixed(3)); }
-    if (monoEl) {
-      // PHONES: the whole monogram is ONE baked-lit texture (every rim/glow/sheen
-      // is pinned lit in responsive.css and flattened in). Nothing inside changes
-      // per frame, so it rasterises ONCE and only transforms/fades. We fade the
-      // lit texture IN with --ignite (dark → lights up → powers off) — that's the
-      // "encendido", compositor-only. DESKTOP keeps mono fully opaque and relights
-      // each rim layer per frame below.
-      monoEl.style.opacity = (isMobile ? ignite : notDim).toFixed(3);
-      monoEl.style.setProperty('--mono-rise', monoRise.toFixed(3));
-    }
-    if (!isMobile) {
-      setOpacity(rimCool,     (0.28 + 0.40 * ignite).toFixed(3));
-      setOpacity(rimWarm,     (0.16 + 0.84 * ignite).toFixed(3));
-      setOpacity(monoGlowLay, (ignite * 0.72).toFixed(3));
-      setOpacity(monoSheen,   (0.12 + 0.85 * ignite).toFixed(3));
+    // ---- ZV image sequence ----
+    // frame index ← lighting progress (frame 0 = dormant/dark, so no fade-in
+    // needed). The rise/shrink is CSS (--mono-rise); the end power-off is opacity.
+    seqSet(Math.round(igniteRaw * (SEQ_FRAMES - 1)));
+    if (seqCanvas) {
+      seqCanvas.style.setProperty('--mono-rise', monoRise.toFixed(3));
+      seqCanvas.style.opacity = notDim.toFixed(3);
     }
 
     // ---- pain title (transform/opacity direct; --wipe drives the span mask) ----

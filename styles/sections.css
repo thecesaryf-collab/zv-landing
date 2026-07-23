@@ -182,30 +182,24 @@
                 rgba(0,0,0,0) calc(var(--wipe,0) * 150%));
 }
 
-/* --- the SINGLE 3D monogram --- */
-.act__mono {
+/* --- the ZV ignite: a scroll-scrubbed image sequence on one <canvas> ---
+   Replaces the old multi-layer CSS 3D monogram (extrude/rims/glow/sheen/masks),
+   whose per-frame blending of several full-screen ZV-masked layers was the
+   structural fill-rate wall on phones. The gold render already carries all the
+   3D/lighting, so here we just draw one frame per scroll position. */
+.act__seq {
   position: absolute; left: 50%; bottom: 0; z-index: 2;
-  width: min(106vh, 134vw); aspect-ratio: 1 / 1;
-  /* peek 44% → rise to -4% and shrink 40%, via --mono-rise */
-  transform: translate(-50%, calc(44% - var(--mono-rise, 0) * 48%))
-             scale(calc(1 - 0.4 * var(--mono-rise, 0)));
-  /* NO filter here: an animated drop-shadow blur re-rasterises this huge element
-     every frame (the main source of scroll lag on low-end devices). The contact
-     shadow lives in .mono__shadow; the ignite halo is .act__monoglow (a soft
-     radial, cheap to move/scale). This element is now a plain transformable layer. */
-  opacity: var(--mono-op, 1);        /* the whole object fades out as it powers off */
-  pointer-events: none; will-change: transform, opacity;
-}
-/* ignite halo — a soft radial glow (no blur filter → the GPU just moves/scales a
-   cached texture each frame). Follows the monogram and brightens with --ignite. */
-.act__monoglow {
-  position: absolute; left: 50%; bottom: 0; z-index: 2;
-  width: min(150vh, 188vw); aspect-ratio: 1 / 1;
-  transform: translate(-50%, calc(44% - var(--mono-rise, 0) * 48%))
-             scale(calc(1 - 0.4 * var(--mono-rise, 0)));
-  background: radial-gradient(closest-side,
-              rgba(217,169,78,0.40), rgba(198,122,46,0.16) 44%, transparent 70%);
-  opacity: calc(var(--ignite, 0) * (1 - var(--dim, 0)));
+  /* landscape render (797×454). Sized big so the ZV reads at hero scale; TUNE
+     these two constants + the translate below to taste (framing knobs). */
+  width: min(168vh, 150vw); height: auto; aspect-ratio: 797 / 454;
+  /* same choreography as before: peek from low → rise + shrink, via --mono-rise */
+  transform: translate(-50%, calc(24% - var(--mono-rise, 0) * 40%))
+             scale(calc(1 - 0.32 * var(--mono-rise, 0)));
+  opacity: 1;
+  /* the frame's near-black background → transparent, so the gold logo composites
+     OVER the warm bg lights (and the pain title shows through the ZV's gaps).
+     One blend on ONE element — cheap, unlike the old ~7 masked layers. */
+  mix-blend-mode: screen;
   pointer-events: none; will-change: transform, opacity;
 }
 
@@ -307,83 +301,6 @@
   transform-origin: top;
 }
 @keyframes cueDrop { 0%{transform:scaleY(0);opacity:0} 40%{opacity:1} 100%{transform:scaleY(1);opacity:0} }
-
-/* -----------------------------------------------------------------
-   3D MONOGRAM COMPONENT (.mono)
-   The flat PNG silhouette is turned into a dimensional glass/obsidian
-   object: stacked offset copies fake extruded thickness, offset rim
-   layers catch a warm (top-left) and cool (bottom-right) edge light,
-   and a gold "ignite" layer floods the body as --ignite: 0 → 1.
-   ----------------------------------------------------------------- */
-.mono { position: relative; width: 100%; height: 100%; }
-.mono > span {
-  position: absolute; inset: 0;
-  -webkit-mask: url("../ZV_logo.png") center / contain no-repeat;
-  mask: url("../ZV_logo.png") center / contain no-repeat;
-}
-/* only the layers whose OPACITY animates per frame get their own compositor
-   layer, so their changes are GPU-composited (no repaint). extrude + face are
-   static and paint into the base layer — fewer layers, no wasted memory. */
-.mono__rim--cool, .mono__rim--warm, .mono__glow, .mono__sheen {
-  will-change: opacity;
-}
-/* soft contact shadow cast down-behind the object */
-.mono__shadow {
-  /* soft radial grounding shadow (no ZV mask, no blur filter → static texture,
-     never re-rasterises when the logo scales) */
-  -webkit-mask: none; mask: none;
-  background: radial-gradient(58% 48% at 50% 90%, rgba(0,0,0,0.72), transparent 72%);
-  opacity: 0.6;
-}
-/* extruded thickness — a dark copy pushed down-right */
-.mono__extrude {
-  background: linear-gradient(155deg, #100c08, #050403 70%);
-  transform: translate(6px, 9px);
-}
-/* cool counter-rim (teal), like the reference edge light */
-.mono__rim--cool {
-  background: linear-gradient(150deg, rgba(120,200,215,0) 46%,
-              rgba(96,158,172,0.5) 76%, rgba(168,232,242,0.9) 100%);
-  transform: translate(4px, 5px);
-  opacity: calc(0.28 + 0.4 * var(--ignite));
-}
-/* warm key-rim (gold), top-left */
-.mono__rim--warm {
-  background: linear-gradient(158deg, var(--gold-lit) 0%, var(--gold) 34%,
-              rgba(120,80,20,0) 66%);
-  transform: translate(-3px, -4px);
-  opacity: calc(0.16 + 0.84 * var(--ignite));
-}
-/* obsidian body with a top-lit rounded-metal falloff */
-.mono__face {
-  background: linear-gradient(158deg, #33271b 0%, #1a130d 34%,
-              #0b0805 60%, #070504 78%, #1e150c 100%);
-}
-/* molten-gold ignite flood. No mix-blend-mode (blend modes force off-screen
-   compositing + backdrop readback every frame — very heavy on mobile GPUs).
-   Opacity is kept lower so the dark face modelling still shows through the alpha,
-   keeping the object dimensional instead of flat gold. */
-.mono__glow {
-  background: linear-gradient(150deg, var(--gold-lit) 0%, var(--gold) 30%,
-              var(--gold-deep) 56%, #3a2710 86%);
-  opacity: calc(var(--ignite) * 0.72);
-}
-/* travelling specular streak. The streak lives in a child <i> that moves via
-   TRANSFORM (compositor-only, no repaint) while the parent's ZV mask clips it to
-   the logo shape — instead of animating background-position, which repainted this
-   whole big masked layer on every frame, forever. */
-.mono__sheen {
-  opacity: calc(0.12 + 0.85 * var(--ignite));
-  overflow: hidden;   /* no mix-blend-mode: too costly on mobile; a translucent white streak reads the same */
-}
-.mono__sheen > i {
-  position: absolute; top: 0; bottom: 0; left: -55%; right: -55%;
-  background: linear-gradient(112deg, transparent 44%, rgba(255,247,224,0.6) 50%, transparent 56%);
-  animation: sheen 7s var(--ease-io) infinite;
-  will-change: transform;
-}
-@keyframes sheen { 0% { transform: translateX(34%); } 100% { transform: translateX(-34%); } }
-@media (prefers-reduced-motion: reduce) { .mono__sheen { animation: none; } }
 
 /* --- pain pills: a scattered stream that rises with scroll (driven per
        pill by JS: --py vh, --op opacity, --bl blur). --- */
