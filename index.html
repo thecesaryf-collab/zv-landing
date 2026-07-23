@@ -10,9 +10,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..500&family=Hanken+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 
 <!-- ?v=… busts caches so CSS + JS always update together (a stale mix breaks reveals) -->
-<link rel="stylesheet" href="styles/base.css?v=19" />
-<link rel="stylesheet" href="styles/sections.css?v=19" />
-<link rel="stylesheet" href="styles/responsive.css?v=19" />
+<link rel="stylesheet" href="styles/base.css?v=20" />
+<link rel="stylesheet" href="styles/sections.css?v=20" />
+<link rel="stylesheet" href="styles/responsive.css?v=20" />
 
 <link rel="icon" href="ZV_logo.png" />
 
@@ -78,13 +78,12 @@
         <span>Tu negocio pierde dinero cada día por…</span>
       </div>
 
-      <!-- the ZV ignite is a PRE-RENDERED image sequence (real 3D render),
-           scrubbed by scroll on a single <canvas>. mix-blend-mode: screen drops
-           the near-black frame background so the gold logo floats OVER the kept
-           warm bg lights (and the pain title shows through its gaps). No CSS 3D /
-           masks / shadows → no per-frame fill-rate wall. Motion (rise + shrink +
-           power-off) still runs in CSS via --mono-rise. -->
-      <canvas class="act__seq" data-seq width="797" height="454" aria-hidden="true"></canvas>
+      <!-- the ZV ignite is a PRE-RENDERED image sequence (real 3D render) with
+           ALPHA, scrubbed by scroll on a single <canvas>. Square + transparent,
+           framed exactly like the original ZV_logo.png, so the same CSS transform
+           moves/scales it. No CSS 3D / masks / shadows / blend → no per-frame
+           fill-rate wall. Motion (rise + shrink + power-off) runs in CSS. -->
+      <canvas class="act__seq" data-seq width="900" height="900" aria-hidden="true"></canvas>
 
       <!-- top layer: hero copy (fades out as the sequence begins) -->
       <div class="act__hero" data-hero-copy>
@@ -317,4 +316,4 @@
   </span>
 </a>
 
-<script type="module" src="js/main.js?v=19"></script>
+<script type="module" src="js/main.js?v=20"></script>

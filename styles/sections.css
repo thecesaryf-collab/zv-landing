@@ -189,25 +189,14 @@
    3D/lighting, so here we just draw one frame per scroll position. */
 .act__seq {
   position: absolute; left: 50%; bottom: 0; z-index: 2;
-  /* landscape render (797×454). Sized big so the ZV reads at hero scale; TUNE
-     these two constants + the translate below to taste (framing knobs). */
-  width: min(82vh, 74vw); height: auto; aspect-ratio: 797 / 454;
-  /* same choreography as before: peek from low → rise + shrink, via --mono-rise.
-     The render fills its frame edge-to-edge (unlike the old padded PNG), so the
-     box is deliberately smaller than the old monogram to match its on-screen size. */
-  transform: translate(-50%, calc(-8% - var(--mono-rise, 0) * 52%))
-             scale(calc(1 - 0.3 * var(--mono-rise, 0)));
+  /* square + alpha, framed exactly like the original ZV_logo.png → identical
+     size/scale/travel as the old CSS monogram (peek 44% → rise to -4%, shrink 40%). */
+  width: min(106vh, 134vw); aspect-ratio: 1 / 1;
+  transform: translate(-50%, calc(44% - var(--mono-rise, 0) * 48%))
+             scale(calc(1 - 0.4 * var(--mono-rise, 0)));
   opacity: 1;
-  /* the frame's near-black background → transparent, so the gold logo composites
-     OVER the warm bg lights (and the pain title shows through the ZV's gaps).
-     One blend on ONE element — cheap, unlike the old ~7 masked layers. */
-  mix-blend-mode: screen;
-  /* the render has real light spilling onto its backdrop, so screen alone would
-     leave a faint LIT RECTANGLE. A static radial feather fades the frame's edges
-     to nothing → that spill reads as a soft glow halo around the ZV instead of a
-     box. Rasterised once (no per-frame cost). */
-  -webkit-mask: radial-gradient(62% 74% at 50% 46%, #000 42%, transparent 100%);
-          mask: radial-gradient(62% 74% at 50% 46%, #000 42%, transparent 100%);
+  /* transparent frames → the logo composites directly over the warm bg lights,
+     and the pain title shows through the ZV's gaps. No blend / mask / 3D layers. */
   pointer-events: none; will-change: transform, opacity;
 }
 

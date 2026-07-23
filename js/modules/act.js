@@ -44,20 +44,23 @@ export function initAct() {
   const root = document.documentElement;
 
   // ---- ZV ignite = a scroll-scrubbed IMAGE SEQUENCE on one <canvas> ----
-  // A pre-rendered 3D clip (dark → gold) as 106 frames. We draw ONE frame per
-  // scroll position (only when it changes) — no CSS masks/layers, so none of the
-  // per-frame fill-rate/repaint cost the old CSS monogram had. The rise/shrink/
-  // power-off motion still runs in CSS via --mono-rise + the canvas opacity.
-  const SEQ_FRAMES = 106;                       // assets/act/zv-seq/0000.jpg … 0105.jpg
-  const SEQ_PATH   = 'assets/act/zv-seq/';
+  // A pre-rendered 3D clip (dark → gold) as 101 transparent WebP frames, 1:1 the
+  // framing of the original ZV_logo.png (square, alpha), so the SAME CSS
+  // transform/scale that moved the old monogram moves this. We draw ONE frame per
+  // scroll position (only when it changes) — no CSS masks/layers/3D, so none of
+  // the per-frame fill-rate/repaint cost the old CSS monogram had. The alpha
+  // clips the logo cleanly (no blend mode needed). Rise/shrink/power-off stay CSS.
+  const SEQ_FRAMES = 101;                       // assets/act/zv-seq-a/0000.webp … 0100.webp
+  const SEQ_PATH   = 'assets/act/zv-seq-a/';
   const seqCanvas  = act.querySelector('[data-seq]');
-  const seqCtx     = seqCanvas?.getContext('2d', { alpha: false });
+  const seqCtx     = seqCanvas?.getContext('2d');   // alpha kept: frames are transparent
   const seqImgs    = new Array(SEQ_FRAMES);
   let seqCur = -1, seqWant = 0;                 // last-drawn / wanted frame index
   const seqPaint = () => {
     const img = seqImgs[seqWant];
     if (!seqCtx || seqCur === seqWant || !img || !img.complete || !img.naturalWidth) return;
     seqCur = seqWant;
+    seqCtx.clearRect(0, 0, seqCanvas.width, seqCanvas.height);   // wipe: frames have alpha
     seqCtx.drawImage(img, 0, 0, seqCanvas.width, seqCanvas.height);
   };
   const seqSet = (i) => { seqWant = i < 0 ? 0 : i >= SEQ_FRAMES ? SEQ_FRAMES - 1 : i; seqPaint(); };
@@ -67,7 +70,7 @@ export function initAct() {
       img.decoding = 'async';
       // redraw as soon as the frame the scroll currently wants finishes loading
       img.onload = () => { if (i === seqWant) seqPaint(); };
-      img.src = `${SEQ_PATH}${String(i).padStart(4, '0')}.jpg`;
+      img.src = `${SEQ_PATH}${String(i).padStart(4, '0')}.webp`;
       seqImgs[i] = img;
     }
   }
