@@ -42,14 +42,15 @@
      constant no matter how much a shorter word is scaled up. */
   .ticker {
     text-align: center;
-    /* scale from the TOP so the window's top edge (where words vanish) stays put
-       just below "Más" instead of rising into it when a short word scales up.
-       Plus a small gap so that disappear line sits clearly lower. */
     transform: scale(var(--word-scale, 1));
-    transform-origin: center top;
+    transform-origin: center 27%;
     transition: width 0.6s var(--ease-io), transform 0.6s var(--ease-io);
-    margin-top: 0.18em;
     margin-bottom: 0.5em;
+    /* Don't move "Más" or the word — just LOWER the top edge of the word's mask
+       so a rising word disappears a bit sooner (clear of "Más"), by fading the
+       top slice of the window to transparent. */
+    -webkit-mask: linear-gradient(180deg, transparent 0, #000 16%);
+            mask: linear-gradient(180deg, transparent 0, #000 16%);
   }
   .hero__subtitle { font-size: var(--step-1); }
 

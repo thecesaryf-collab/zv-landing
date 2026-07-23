@@ -165,9 +165,10 @@ export function initAct() {
       paintEl.style.transform = `translateY(${textY.toFixed(2)}vh)`;
       paintEl.style.opacity = paintOp.toFixed(3);
       paintEl.style.setProperty('--wipe', wipe.toFixed(3));
-      // soft-blur the title while the pain chips stream OVER it, so the chip text
-      // reads cleanly. Class toggle (not a per-frame radius) → rasterises once.
-      paintEl.classList.toggle('is-behind-pills', p > 0.15 && p < 0.52);
+      // soft-blur the title only once the pain chips actually reach it and start
+      // crossing OVER it (~p 0.35), not from the moment the first chip appears.
+      // Class toggle (not a per-frame radius) → rasterises once.
+      paintEl.classList.toggle('is-behind-pills', p > 0.35 && p < 0.52);
     }
 
     // ---- hero copy + scroll cue ----
