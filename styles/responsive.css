@@ -55,9 +55,9 @@
      frame per scroll position — no masks/layers, so no fill-rate wall. TUNE the
      width + translate to taste. */
   .act__seq {
-    width: 178vw;
-    transform: translate(-50%, calc(20% - var(--mono-rise, 0) * 34%))
-               scale(calc(1 - 0.3 * var(--mono-rise, 0)));
+    width: 92vw;
+    transform: translate(-50%, calc(-40% - var(--mono-rise, 0) * 55%))
+               scale(calc(1 - 0.32 * var(--mono-rise, 0)));
   }
   .act__aura { display: none; }         /* full-viewport ambient layer — trims fill-rate */
   .act__bg::after { display: none; }    /* full-viewport warm-lift layer — trims fill-rate */
